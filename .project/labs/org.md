@@ -23,36 +23,32 @@ Prove a classic theme zip is ready for WordPress.org Theme Directory review.
 - WooCommerce, FSE, comments/PII forms, RTL (product exclusions unless lab config opts in)
 - Claiming `accessibility-ready` without focus-trap + manual pass
 
-## Runners (planned)
+## Runners
 
-- `zip-lint`
-- `theme-check`
-- `http-matrix` / wp-cli smoke
-- optional Playwright keyboard
+- `zip-lint` — Gate 1 packaging
+- `theme-check` — Gate 2 headless Theme Check (install zip on compose WP)
+- `http-matrix` — Gate 3 HTTP smoke GET asserts on adapter URL matrix
+- optional Playwright keyboard (Gate 4)
 
 ## Policy pack
 
 `wordpress-org` → `FIX_THEME`, `BLOCK_TAG`, `ACCEPT` as appropriate.
 
-## Status (Cycle C + Gate 1 P0)
+## Status
 
-- **zip-lint** implements full Gate 1 from `.project/check/theme-check.md`:
-  - required files (`style.css`, `readme.txt`, `LICENSE`, `screenshot`, `functions.php`)
-  - forbidden paths (`.git`, `.cursor`, `node_modules`, monorepo dirs, OS junk)
-  - forbidden extensions (`.xml` allowlist, `.sh`, `.sql`, nested `.zip`)
-  - screenshot ≤1200×900 ~4:3
-  - `style.css` headers: Version, Requires at least, Tested up to, Requires PHP, Text Domain **= folder slug**
-  - tags: block `accessibility-ready` / `e-commerce` unless config allows
-  - Resources section vs `assets/` + `lib/` attribution
-  - minified twin rule (`*.min.js/css` → source)
-  - policy scan: CPT, shortcode, woocommerce, comments_template, contact-form patterns
-- **theme-check** Docker/compose path (`runners/theme-check`, profile `org`)
-- **http-matrix** records adapter URL matrix
-- Manifest: `testdata/manifests/org.lab.yaml`
+- **zip-lint** — full Gate 1 (see `.project/check/theme-check.md`)
+- **theme-check** — Docker runner installs `themeZip`, activates Theme Check, emits `org.themecheck.*` (CLI or `run-check.php`)
+- **http-matrix** — real HTTP status asserts (`org.matrix.ok` / `status_*`); `listOnly=true` for list-only mode
+- Manifest: `testdata/manifests/org.lab.yaml` (`themeZip: testdata/dist/latte.zip`)
 - Policy pack: `wordpress-org`
 
-Config knobs on the check: `allowAccessibilityReady`, `allowEcommerce`, `skipPolicyScan`.
+Config knobs on zip-lint: `allowAccessibilityReady`, `allowEcommerce`, `skipPolicyScan`.
 
-Set `spec.adapter.config.themeZip` to a theme zip path before expecting zip-lint to pass.
+Gate 2 check config: `dockerNetwork`, `wpDataVolume`, `internalUrl` (defaults in `org.lab.yaml` for compose project `fastygo-lab`).
+
+```bash
+make org-up && make runners
+go run ./apps/cli run -f testdata/manifests/org.lab.yaml
+```
 
 

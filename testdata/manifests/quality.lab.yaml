@@ -18,6 +18,10 @@ spec:
             perfWarn: "0.9"
             a11yFail: "0.9"
             a11yWarn: "0.95"
+    - id: Q2-vnu
+      checks:
+        - id: vnu-html
+          runner: vnu
     - id: Q4-axe
       checks:
         - id: axe-wcag

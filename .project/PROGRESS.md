@@ -1,6 +1,6 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-10 (Gate 1 zip-lint complete; check coverage SSOT)  
+**Last updated:** 2026-07-10 (Org Gate 2/3 HTTP smoke + Quality Q2 vnu)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
 
@@ -12,9 +12,9 @@
 
 **→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-1. Org Gate 2 — headless Theme Check on compose  
-2. Org Gate 3 — Unit Test import + HTTP smoke  
-3. Quality Q2/Q3 — vnu + stylelint  
+1. Org Gate 3 remainder — Theme Unit Test XML import + notice hunter  
+2. Quality Q3 — stylelint  
+3. Sec S1 — user enum + sensitive files + REST  
 4. Cycle E — static-web adapters (React/Vue/Svelte)
 
 ---
@@ -26,10 +26,10 @@
 | `.project/` KB | Done |
 | Go domain + contracts + policy | Done |
 | Orchestrator + CLI | Done (v0.2.0) |
-| Docker runner port | Done (Cycle B) |
-| `quality` L0 (LH + axe + static) | Done |
+| Docker runner port | Done (Cycle B; zip mount + compose net) |
+| `quality` L0 (LH + axe + vnu + static) | Done |
 | `wordpress` adapter stub | Done |
-| `org` zip-lint + theme-check compose | Done |
+| `org` Gate 1 zip-lint + Gate 2 Theme Check + Gate 3 HTTP smoke | Done |
 | `sec` headers + wpscan | Done |
 | SaaS API | Not started |
 
@@ -66,6 +66,7 @@ A Foundation ✓
 | B2 | axe runner image | [x] |
 | B3 | `static` + `wordpress` stub adapters | [x] |
 | B4 | `quality.lab.yaml` + lightspeed policy | [x] |
+| B5 | Q2 vnu runner + quality gate | [x] |
 
 ---
 
@@ -75,8 +76,8 @@ A Foundation ✓
 |-------|------|------|
 | C1 | In-process zip-lint + fixtures/tests | [x] |
 | C1+ | Gate 1 full zip-lint (ext, Resources, policy, min twins, slug) | [x] |
-| C2 | Compose `org` + theme-check runner | [x] |
-| C3 | `org.lab.yaml` + http-matrix + wordpress-org policy | [x] |
+| C2 | Compose `org` + Theme Check headless (zip install) | [x] |
+| C3 | HTTP smoke asserts on URL matrix + wordpress-org policy | [x] |
 
 ---
 
@@ -101,6 +102,8 @@ A Foundation ✓
 | 2026-07 | Missing Docker → finding `runner.docker.unavailable` (no panic) |
 | 2026-07 | Zip-lint Gate 1 P0: full packaging checklist from `.project/check/theme-check.md` |
 | 2026-07 | Policy packs: default, lightspeed, wordpress-org, secure-baseline |
+| 2026-07 | Gate 2: theme zip mounted into theme-check container; share compose WP volume/network |
+| 2026-07 | Gate 3: `http-matrix` performs real GET asserts (not list-only) |
 
 ---
 
@@ -110,11 +113,11 @@ A Foundation ✓
 go test ./...
 go run ./apps/cli labs
 go run ./apps/cli run -f testdata/manifests/demo.lab.yaml
-go run ./apps/cli run -f testdata/manifests/quality.lab.yaml   # needs Docker images for real LH/axe
-go run ./apps/cli run -f testdata/manifests/org.lab.yaml       # zip-lint needs themeZip in adapter config
+go run ./apps/cli run -f testdata/manifests/quality.lab.yaml   # needs Docker images for real LH/axe/vnu
+go run ./apps/cli run -f testdata/manifests/org.lab.yaml       # themeZip=testdata/dist/latte.zip
 go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
-make runners   # docker build lab/*:local
-docker compose -f deploy/compose/docker-compose.yml --profile quality up -d
-docker compose -f deploy/compose/docker-compose.yml --profile org up -d
+make runners   # docker build lab/*:local (incl. theme-check, vnu)
+make org-up    # compose --profile org
+make quality-up
 ```

@@ -16,11 +16,13 @@ Lab intensity levels for local Docker.
 - Profiles must not require the `wpfasty` monorepo bind-mount for release-shaped runs (install from zip/artifact).
 - Dev bind-mounts are allowed only under an explicit `dev` profile (future).
 - Network: dedicated bridge per compose project; runners resolve target by service DNS name.
-- Cycle A: compose file documents profiles; real tool services arrive in B+.
+- Theme Check runner joins `fastygo-lab_lab` and mounts `fastygo-lab_wp_org_data` + host `themeZip`.
 
-## Commands (future)
+## Commands
 
 ```bash
-docker compose -f deploy/compose/docker-compose.yml --profile smoke up -d
-docker compose -f deploy/compose/docker-compose.yml --profile quality up
+make org-up
+make quality-up
+make runners
+go run ./apps/cli run -f testdata/manifests/org.lab.yaml
 ```

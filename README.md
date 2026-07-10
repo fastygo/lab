@@ -13,20 +13,21 @@ go run ./apps/cli labs
 go run ./apps/cli run -f testdata/manifests/demo.lab.yaml
 ```
 
-### Quality L0 (Lighthouse + axe)
+### Quality L0 (Lighthouse + vnu + axe)
 
 ```bash
 make runners                                          # build images
+make quality-up                                       # nginx fixture :8091
 go run ./apps/cli run -f testdata/manifests/quality.lab.yaml
 # Without Docker: report includes runner.docker.unavailable (accepted by lightspeed pack)
 ```
 
-### Org (zip-lint + Theme Check path)
+### Org (zip-lint + Theme Check + HTTP smoke)
 
 ```bash
-# Set themeZip in org.lab.yaml adapter config, then:
+# themeZip defaults to testdata/dist/latte.zip in org.lab.yaml
+make org-up && make runners
 go run ./apps/cli run -f testdata/manifests/org.lab.yaml
-docker compose -f deploy/compose/docker-compose.yml --profile org up -d
 ```
 
 ### Sec (headers + WPScan)
@@ -42,9 +43,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 packages/domain|contracts|policy|orchestrator|registry
 packages/adapters/{noop,static,wordpress}
 apps/cli
-runners/{lighthouse,axe,theme-check,wpscan}
+runners/{lighthouse,axe,theme-check,vnu,wpscan}
 deploy/compose/
-testdata/manifests|fixtures
+testdata/manifests|fixtures|dist
 .project/
 ```
 

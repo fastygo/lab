@@ -34,6 +34,8 @@ func packRules(pack string) []Rule {
 			{Code: "quality.lighthouse.performance", Basket: domain.BasketBudget, Rationale: "Tune perf budgets / FIX_THEME assets"},
 			{Code: "quality.lighthouse.accessibility", Basket: domain.BasketFixTheme, Rationale: "A11y score below threshold"},
 			{Code: "quality.axe.ok", Basket: domain.BasketAccept, Rationale: "No axe violations"},
+			{Code: "quality.vnu.ok", Basket: domain.BasketAccept, Rationale: "HTML validates"},
+			{Code: "quality.vnu.no_errors", Basket: domain.BasketAccept, Rationale: "No vnu errors"},
 			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "Docker missing in unit/dev; re-run with Docker for real scores"},
 		}...)
 	case "wordpress-org":
@@ -44,6 +46,10 @@ func packRules(pack string) []Rule {
 			{Code: "org.zip.missing_readme_txt", Basket: domain.BasketFixTheme, Rationale: "Required for .org"},
 			{Code: "org.zip.missing_license", Basket: domain.BasketFixTheme, Rationale: "GPL license file required"},
 			{Code: "org.matrix.listed", Basket: domain.BasketAccept, Rationale: "Matrix recorded"},
+			{Code: "org.matrix.ok", Basket: domain.BasketAccept, Rationale: "HTTP smoke OK"},
+			{Code: "org.matrix.smoke_summary", Basket: domain.BasketAccept, Rationale: "HTTP smoke summary"},
+			{Code: "org.themecheck.ok", Basket: domain.BasketAccept, Rationale: "Theme Check clean"},
+			{Code: "org.themecheck.no_required", Basket: domain.BasketAccept, Rationale: "No Theme Check required errors"},
 			{Code: "org.themecheck.plugin_ready", Basket: domain.BasketAccept, Rationale: "Theme Check installed"},
 			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "Theme Check needs Docker compose org profile"},
 		}...)
@@ -115,8 +121,19 @@ func heuristic(pack, code string) *domain.Decision {
 		hasPrefix(code, "org.zip.nested_") ||
 		hasPrefix(code, "org.zip.policy_")):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme packaging / Gate 1 issue"}
+	case pack == "wordpress-org" && (code == "org.themecheck.required" || hasPrefix(code, "org.themecheck.") &&
+		(hasSuffix(code, "_failed") || hasSuffix(code, "_missing") || code == "org.themecheck.wp_not_ready" || code == "org.themecheck.no_active_theme")):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme Check / Gate 2 issue"}
+	case pack == "wordpress-org" && code == "org.themecheck.warning":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Theme Check warning — review"}
+	case pack == "wordpress-org" && (code == "org.matrix.status_5xx" || code == "org.matrix.status_unexpected" || code == "org.matrix.fetch_failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "HTTP smoke failure"}
+	case pack == "wordpress-org" && code == "org.matrix.soft_404":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Soft-404 — review template"}
 	case pack == "lightspeed" && hasPrefix(code, "quality.axe.") && code != "quality.axe.ok":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Axe violation"}
+	case pack == "lightspeed" && (code == "quality.vnu.error" || code == "quality.vnu.fetch_failed" || code == "quality.vnu.exec_failed" || code == "quality.vnu.parse_failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "HTML validation error"}
 	case pack == "secure-baseline" && hasPrefix(code, "sec.recon."):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketSiteDefaultOff, Rationale: "Reduce attack surface"}
 	}
@@ -125,6 +142,10 @@ func heuristic(pack, code string) *domain.Decision {
 
 func hasPrefix(s, p string) bool {
 	return len(s) >= len(p) && s[:len(p)] == p
+}
+
+func hasSuffix(s, suf string) bool {
+	return len(s) >= len(suf) && s[len(s)-len(suf):] == suf
 }
 
 // Pack returns the pack name.

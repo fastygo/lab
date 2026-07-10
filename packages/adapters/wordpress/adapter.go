@@ -4,17 +4,21 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/fastygo/lab/packages/domain"
 )
 
 // Adapter is a stub WordPress target: config supplies baseUrl and optional themeZip.
 type Adapter struct {
+	repoRoot string
 	baseURL  string
 	themeZip string
 }
 
-func New() *Adapter { return &Adapter{} }
+func New(repoRoot string) *Adapter {
+	return &Adapter{repoRoot: repoRoot}
+}
 
 func (a *Adapter) ID() string { return "wordpress" }
 
@@ -27,13 +31,44 @@ func (a *Adapter) Prepare(_ context.Context, config map[string]string) error {
 	if a.baseURL == "" {
 		a.baseURL = "http://127.0.0.1:8080"
 	}
-	a.themeZip = config["themeZip"]
-	if a.themeZip != "" {
-		if _, err := os.Stat(a.themeZip); err != nil {
+	zip := config["themeZip"]
+	if zip != "" {
+		resolved, err := resolveThemeZip(zip, a.repoRoot)
+		if err != nil {
 			return fmt.Errorf("themeZip: %w", err)
 		}
+		a.themeZip = resolved
 	}
 	return nil
+}
+
+func resolveThemeZip(zip, repoRoot string) (string, error) {
+	candidates := []string{zip}
+	if !filepath.IsAbs(zip) {
+		if wd, err := os.Getwd(); err == nil {
+			candidates = append(candidates, filepath.Join(wd, zip))
+		}
+		if repoRoot != "" {
+			candidates = append(candidates, filepath.Join(repoRoot, zip))
+		}
+	}
+	var last error
+	for _, c := range candidates {
+		abs, err := filepath.Abs(c)
+		if err != nil {
+			last = err
+			continue
+		}
+		if st, err := os.Stat(abs); err == nil && !st.IsDir() {
+			return abs, nil
+		} else if err != nil {
+			last = err
+		}
+	}
+	if last == nil {
+		last = os.ErrNotExist
+	}
+	return "", last
 }
 
 func (a *Adapter) Serve(_ context.Context) (domain.Target, error) {

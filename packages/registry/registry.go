@@ -22,7 +22,7 @@ func DefaultAdapters(repoRoot string) []orchestrator.TargetAdapter {
 	return []orchestrator.TargetAdapter{
 		noop.New(),
 		static.New(fixture),
-		wordpress.New(),
+		wordpress.New(repoRoot),
 	}
 }
 
@@ -31,6 +31,7 @@ func DefaultRunners() []orchestrator.Runner {
 	lhImage := envOr("LAB_LIGHTHOUSE_IMAGE", "lab/lighthouse:local")
 	axeImage := envOr("LAB_AXE_IMAGE", "lab/axe:local")
 	tcImage := envOr("LAB_THEMECHECK_IMAGE", "lab/theme-check:local")
+	vnuImage := envOr("LAB_VNU_IMAGE", "lab/vnu:local")
 	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "wpscanteam/wpscan:latest")
 
 	return []orchestrator.Runner{
@@ -41,6 +42,7 @@ func DefaultRunners() []orchestrator.Runner {
 		docker.New("lighthouse", lhImage),
 		docker.New("axe", axeImage),
 		docker.New("theme-check", tcImage),
+		docker.New("vnu", vnuImage),
 		docker.New("wpscan", wpscanImage),
 	}
 }

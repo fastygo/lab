@@ -9,7 +9,13 @@
 #   docker build -t lab/lighthouse:local runners/lighthouse
 #   docker build -t lab/axe:local runners/axe
 #   docker build -t lab/theme-check:local runners/theme-check
+#   docker build -t lab/vnu:local runners/vnu
 #   docker build -t lab/wpscan:local runners/wpscan
+#
+# Org Gate 2 (Theme Check) expects:
+#   - profile org up (db + wordpress + wpcli)
+#   - theme zip at testdata/dist/latte.zip (mounted into runners via docker -v)
+#   - lab run uses dockerNetwork=fastygo-lab_lab + wpDataVolume=fastygo-lab_wp_org_data
 #
 # See .project/constructor/compose-profiles.md
 
@@ -75,7 +81,8 @@ services:
       WORDPRESS_DEBUG: "0"
     volumes:
       - wp_org_data:/var/www/html
-      - ${LAB_THEME_ZIP_DIR:-../../testdata/fixtures/themes}:/themes:ro
+      # Theme zips for manual wpcli install; Gate 2 mounts zip via docker runner
+      - ${LAB_THEME_ZIP_DIR:-../../testdata/dist}:/themes:ro
     depends_on:
       db:
         condition: service_healthy
@@ -94,6 +101,7 @@ services:
       WORDPRESS_DB_NAME: wordpress
     volumes:
       - wp_org_data:/var/www/html
+      - ${LAB_THEME_ZIP_DIR:-../../testdata/dist}:/themes:ro
     depends_on:
       - wordpress
     entrypoint: ["sleep", "infinity"]

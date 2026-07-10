@@ -27,9 +27,9 @@ Validate modern site quality: Lighthouse (4×100), W3C HTML5, CSS hygiene, ARIA/
 
 ## L0 scope (Cycle B — implemented)
 
-Gates wired today: **Q1 Lighthouse**, **Q4 axe** via Docker runners + `static` adapter fixture.
+Gates wired today: **Q1 Lighthouse**, **Q2 vnu**, **Q4 axe** via Docker runners + `static` adapter fixture.
 
-Not yet: Q2 vnu, Q3 stylelint, Q5 SEO graph, Q6 extras (follow-up after B).
+Not yet: Q3 stylelint, Q5 SEO graph, Q6 extras.
 
 Manifest: `testdata/manifests/quality.lab.yaml`  
 Policy pack: `lightspeed`

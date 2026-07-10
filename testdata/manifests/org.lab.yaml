@@ -8,7 +8,7 @@ spec:
     id: wordpress
     config:
       baseUrl: http://127.0.0.1:8080
-      # themeZip: /path/to/latte.zip
+      themeZip: testdata/dist/latte.zip
   policy:
     pack: wordpress-org
   gates:
@@ -16,11 +16,15 @@ spec:
       checks:
         - id: zip-lint
           runner: zip-lint
-          # themeZip taken from adapter metadata when set
     - id: C2-theme-check
       checks:
         - id: theme-check
           runner: theme-check
+          config:
+            # Join compose project network + share WP files (after: make org-up)
+            dockerNetwork: fastygo-lab_lab
+            wpDataVolume: fastygo-lab_wp_org_data
+            internalUrl: http://wordpress
     - id: C3-matrix
       checks:
         - id: url-matrix

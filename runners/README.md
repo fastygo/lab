@@ -13,6 +13,7 @@ A **runner** executes one tool (or a small tool family) and emits **findings** J
 | `lighthouse` | Docker | `runners/lighthouse` → `lab/lighthouse:local` |
 | `axe` | Docker | `runners/axe` → `lab/axe:local` |
 | `theme-check` | Docker | `runners/theme-check` → `lab/theme-check:local` |
+| `vnu` | Docker | `runners/vnu` → `lab/vnu:local` |
 | `wpscan` | Docker | `runners/wpscan` / `wpscanteam/wpscan` |
 
 Build: `make runners`
@@ -29,8 +30,10 @@ If Docker is missing, Docker-backed runners emit finding `runner.docker.unavaila
 | `LAB_CHECK_ID` | Check id from the manifest |
 | `LAB_GATE_ID` | Gate id |
 | `LAB_CONFIG_JSON` | Check-specific config |
-| `LAB_THEME_ZIP` | Optional theme zip path |
+| `LAB_THEME_ZIP` | Optional theme zip path (container path after mount) |
 | `WPSCAN_API_TOKEN` | Optional WPScan API token |
+
+Theme Check (Gate 2) also uses check config: `dockerNetwork`, `wpDataVolume`, `internalUrl`. The Go docker runner mounts host `themeZip` to `/lab/theme.zip`.
 
 ### Output
 

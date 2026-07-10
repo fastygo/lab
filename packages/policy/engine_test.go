@@ -49,13 +49,29 @@ func TestEngineMapLightspeed(t *testing.T) {
 	}
 }
 
-func TestEngineMapSecureBaseline(t *testing.T) {
+func TestEngineMapWordpressOrgGate23(t *testing.T) {
 	t.Parallel()
-	e := NewEngine("secure-baseline")
+	e := NewEngine("wordpress-org")
 	decisions := e.Map([]domain.Finding{
-		{Code: "sec.recon.xmlrpc", Severity: domain.SeverityHigh},
+		{Code: "org.themecheck.required", Severity: domain.SeverityHigh},
+		{Code: "org.matrix.status_5xx", Severity: domain.SeverityHigh},
+		{Code: "org.matrix.ok", Severity: domain.SeverityInfo},
+		{Code: "org.themecheck.no_required", Severity: domain.SeverityInfo},
 	})
-	if decisions[0].Basket != domain.BasketSiteDefaultOff {
-		t.Fatalf("%+v", decisions[0])
+	by := map[string]domain.Decision{}
+	for _, d := range decisions {
+		by[d.FindingCode] = d
+	}
+	if by["org.themecheck.required"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["org.themecheck.required"])
+	}
+	if by["org.matrix.status_5xx"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["org.matrix.status_5xx"])
+	}
+	if by["org.matrix.ok"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["org.matrix.ok"])
+	}
+	if by["org.themecheck.no_required"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["org.themecheck.no_required"])
 	}
 }

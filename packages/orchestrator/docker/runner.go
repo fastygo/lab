@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/fastygo/lab/packages/domain"
@@ -19,10 +20,10 @@ type ExecFunc func(ctx context.Context, name string, args []string, env []string
 
 // Runner invokes a container image and parses findings JSON from stdout.
 type Runner struct {
-	id       string
-	image    string
-	docker   string
-	exec     ExecFunc
+	id        string
+	image     string
+	docker    string
+	exec      ExecFunc
 	extraArgs []string
 }
 
@@ -66,15 +67,17 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 		return []domain.Finding{unavailable(req, "image not configured")}, nil
 	}
 
+	targetURL := req.Target.BaseURL
+	if u := firstNonEmpty(req.Check.Config["internalUrl"], os.Getenv("LAB_INTERNAL_URL")); u != "" {
+		targetURL = u
+	}
+
 	cfgJSON, _ := json.Marshal(req.Check.Config)
 	env := []string{
-		"LAB_TARGET_URL=" + req.Target.BaseURL,
+		"LAB_TARGET_URL=" + targetURL,
 		"LAB_GATE_ID=" + req.Gate,
 		"LAB_CHECK_ID=" + req.Check.ID,
 		"LAB_CONFIG_JSON=" + string(cfgJSON),
-	}
-	if zip := req.Target.Metadata["themeZip"]; zip != "" {
-		env = append(env, "LAB_THEME_ZIP="+zip)
 	}
 	if tok := os.Getenv("WPSCAN_API_TOKEN"); tok != "" {
 		env = append(env, "WPSCAN_API_TOKEN="+tok)
@@ -82,11 +85,29 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 
 	args := []string{"run", "--rm"}
 	args = append(args, r.extraArgs...)
+
+	// Theme zip: mount host file into the container at a stable path.
+	zipHost := firstNonEmpty(req.Check.Config["themeZip"], req.Target.Metadata["themeZip"])
+	if zipHost != "" {
+		abs, err := filepath.Abs(zipHost)
+		if err == nil {
+			zipHost = abs
+		}
+		args = append(args, "-v", zipHost+":/lab/theme.zip:ro")
+		env = append(env, "LAB_THEME_ZIP=/lab/theme.zip")
+	}
+
+	// Optional WP data volume (compose org profile) so theme-check shares files with wordpress.
+	if vol := firstNonEmpty(req.Check.Config["wpDataVolume"], os.Getenv("LAB_WP_DATA_VOLUME")); vol != "" {
+		args = append(args, "-v", vol+":/var/www/html")
+	}
+
+	network := firstNonEmpty(req.Check.Config["dockerNetwork"], os.Getenv("LAB_DOCKER_NETWORK"), "host")
+	args = append(args, "--network", network)
+
 	for _, e := range env {
 		args = append(args, "-e", e)
 	}
-	// Pass network host so containers can reach localhost-served fixtures on the host.
-	args = append(args, "--network", "host")
 	args = append(args, image)
 
 	stdout, stderr, err := r.exec(ctx, r.docker, args, env)
@@ -108,6 +129,15 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 		}}, nil
 	}
 	return parseFindings(stdout, req)
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func unavailable(req ports.RunnerRequest, detail string) domain.Finding {
