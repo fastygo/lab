@@ -28,6 +28,12 @@ Attack **owned lab targets** to decide what to cut from artifacts vs enable/disa
 - Do not ship login-limiter/WAF inside .org theme zips — site baseline only
 - Runners emit findings; policy assigns baskets
 
-## Runners (planned)
+## Status (Cycle D)
 
-- `wpscan`, `nuclei`, `semgrep`/`phpcs-security`, `headers-curl`
+- **headers** in-process recon/headers runner
+- **wpscan** Docker runner wrapper
+- Manifest: `testdata/manifests/sec.lab.yaml`
+- Policy pack: `secure-baseline` (xmlrpc/readme → `SITE_DEFAULT_OFF`, missing headers → `SITE_DEFAULT_ON`)
+
+Nuclei full template pack deferred.
+

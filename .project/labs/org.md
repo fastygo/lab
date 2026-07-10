@@ -34,6 +34,13 @@ Prove a classic theme zip is ready for WordPress.org Theme Directory review.
 
 `wordpress-org` → `FIX_THEME`, `BLOCK_TAG`, `ACCEPT` as appropriate.
 
-## Related
+## Status (Cycle C)
 
-Consumer: `wpfasty` `theme:pack` → feed zip into this lab.
+- **zip-lint** in-process runner + tests (`org.zip.*`)
+- **theme-check** Docker/compose path (`runners/theme-check`, profile `org`)
+- **http-matrix** records adapter URL matrix
+- Manifest: `testdata/manifests/org.lab.yaml`
+- Policy pack: `wordpress-org`
+
+Set `spec.adapter.config.themeZip` to a theme zip path before expecting zip-lint to pass.
+

@@ -1,0 +1,24 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: quality-l0
+spec:
+  lab: quality
+  adapter:
+    id: static
+  policy:
+    pack: lightspeed
+  gates:
+    - id: Q1-lighthouse
+      checks:
+        - id: lighthouse-mobile
+          runner: lighthouse
+          config:
+            perfFail: "0.7"
+            perfWarn: "0.9"
+            a11yFail: "0.9"
+            a11yWarn: "0.95"
+    - id: Q4-axe
+      checks:
+        - id: axe-wcag
+          runner: axe

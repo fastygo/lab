@@ -25,10 +25,12 @@ Validate modern site quality: Lighthouse (4×100), W3C HTML5, CSS hygiene, ARIA/
 - Do not hard-fail on arbitrary Unit Test content HTML; prefer controlled chrome URLs for vnu hard gate
 - `accessibility-ready` tag remains `BLOCK_TAG` until focus-trap + manual SR
 
-## Runners (planned)
+## L0 scope (Cycle B — implemented)
 
-- `lighthouse`, `vnu`, `axe`, `stylelint`, optional meta crawler
+Gates wired today: **Q1 Lighthouse**, **Q4 axe** via Docker runners + `static` adapter fixture.
 
-## Policy pack
+Not yet: Q2 vnu, Q3 stylelint, Q5 SEO graph, Q6 extras (follow-up after B).
 
-`lightspeed` for strict budgets; `default` otherwise.
+Manifest: `testdata/manifests/quality.lab.yaml`  
+Policy pack: `lightspeed`
+

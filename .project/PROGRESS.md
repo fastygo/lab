@@ -1,20 +1,20 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-10 (Cycle A foundation)  
+**Last updated:** 2026-07-10 (Cycles B–D)  
 **Module:** `github.com/fastygo/lab`  
-**CLI:** `lab`
+**CLI:** `lab` v0.2.0
 
 ---
 
 ## Open cycle
 
-**→ Cycle A — Foundation** (in progress / completing)
+**→ Cycle E — static-web adapters** (React/Vue/Svelte)
 
-Next after A:
+Suggested next:
 
-1. Cycle B — `quality` L0 (Lighthouse + axe runners)
-2. Cycle C — `org` lab (zip lint + Theme Check)
-3. Cycle D — `sec` lab (WPScan/nuclei + policy)
+1. Cycle E — `static-web` adapter + framework presets
+2. Cycle F — SaaS API + worker
+3. Quality L1 — vnu / stylelint / Q2–Q6
 
 ---
 
@@ -22,12 +22,14 @@ Next after A:
 
 | Area | Status |
 |------|--------|
-| `.project/` KB | Done (Cycle A) |
-| Go domain + contracts + policy | Done (Cycle A) |
-| Orchestrator + CLI `demo` lab | Done (Cycle A) |
-| Compose profiles stub | Done (Cycle A) |
-| Real runners (LH/vnu/wpscan) | Not started |
-| WordPress adapter | Not started |
+| `.project/` KB | Done |
+| Go domain + contracts + policy | Done |
+| Orchestrator + CLI | Done (v0.2.0) |
+| Docker runner port | Done (Cycle B) |
+| `quality` L0 (LH + axe + static) | Done |
+| `wordpress` adapter stub | Done |
+| `org` zip-lint + theme-check compose | Done |
+| `sec` headers + wpscan | Done |
 | SaaS API | Not started |
 
 ---
@@ -36,9 +38,9 @@ Next after A:
 
 ```
 A Foundation ✓
-  → B quality L0
-    → C org lab
-      → D sec lab
+  → B quality L0 ✓
+    → C org lab ✓
+      → D sec lab ✓
         → E static-web adapters
           → F SaaS API + worker
             → G+ runtime / LLM / load labs
@@ -50,43 +52,39 @@ A Foundation ✓
 
 | Stage | Task | Done |
 |-------|------|------|
-| A0 | `.project/` knowledge base | [x] |
-| A1 | Root README, LICENSE, `.gitignore` | [x] |
-| A2 | Go module + packages skeleton | [x] |
-| A3 | Domain + contracts + policy (TDD) | [x] |
-| A4 | Orchestrator + CLI demo lab | [x] |
-| A5 | Compose stub + runner contract docs | [x] |
+| A0–A5 | KB, skeleton, demo lab, compose stub | [x] |
 
 ---
 
-### Cycle B — Quality L0 (planned)
+### Cycle B — Quality L0
 
 | Stage | Task | Done |
 |-------|------|------|
-| B1 | Lighthouse CI runner image | [ ] |
-| B2 | axe / Playwright runner | [ ] |
-| B3 | `wordpress` adapter stub | [ ] |
-| B4 | Wire `quality` lab manifest | [ ] |
+| B0 | Docker Runner + injectable exec tests; CLI registry | [x] |
+| B1 | Lighthouse runner image | [x] |
+| B2 | axe runner image | [x] |
+| B3 | `static` + `wordpress` stub adapters | [x] |
+| B4 | `quality.lab.yaml` + lightspeed policy | [x] |
 
 ---
 
-### Cycle C — Org lab (planned)
+### Cycle C — Org lab
 
 | Stage | Task | Done |
 |-------|------|------|
-| C1 | Zip lint runner | [ ] |
-| C2 | Theme Check container | [ ] |
-| C3 | Template URL matrix | [ ] |
+| C1 | In-process zip-lint + fixtures/tests | [x] |
+| C2 | Compose `org` + theme-check runner | [x] |
+| C3 | `org.lab.yaml` + http-matrix + wordpress-org policy | [x] |
 
 ---
 
-### Cycle D — Sec lab (planned)
+### Cycle D — Sec lab
 
 | Stage | Task | Done |
 |-------|------|------|
-| D1 | WPScan / nuclei runners | [ ] |
-| D2 | Policy decisions → baskets | [ ] |
-| D3 | Headers / recon checks | [ ] |
+| D1 | Headers / recon runner | [x] |
+| D2 | WPScan Docker runner | [x] |
+| D3 | secure-baseline policy + `sec.lab.yaml` | [x] |
 
 ---
 
@@ -95,11 +93,12 @@ A Foundation ✓
 | Date | Decision |
 |------|----------|
 | 2026-07 | Separate monorepo `fastygo/lab`; `wpfasty` is client |
-| 2026-07 | Go orchestrator; Docker runners; TS only for future SaaS UI |
-| 2026-07 | Hexagonal + DDD; checks never in domain |
-| 2026-07 | First runnable lab = `demo` (noop); real tools in B+ |
-| 2026-07 | CLI binary name `lab`; module `github.com/fastygo/lab` |
-| 2026-07 | Labs are pluggable packs — not limited to org/sec/quality |
+| 2026-07 | Go orchestrator; Docker runners; checks never in domain |
+| 2026-07 | First runnable lab = `demo`; real tools in B+ |
+| 2026-07 | Quality L0 uses static fixture; WP stub for later compose |
+| 2026-07 | Missing Docker → finding `runner.docker.unavailable` (no panic) |
+| 2026-07 | Zip-lint in-process; Theme Check / WPScan via Docker |
+| 2026-07 | Policy packs: default, lightspeed, wordpress-org, secure-baseline |
 
 ---
 
@@ -107,10 +106,13 @@ A Foundation ✓
 
 ```bash
 go test ./...
-go run ./apps/cli version
 go run ./apps/cli labs
 go run ./apps/cli run -f testdata/manifests/demo.lab.yaml
+go run ./apps/cli run -f testdata/manifests/quality.lab.yaml   # needs Docker images for real LH/axe
+go run ./apps/cli run -f testdata/manifests/org.lab.yaml       # zip-lint needs themeZip in adapter config
+go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
-# future
-docker compose -f deploy/compose/docker-compose.yml --profile smoke up
+make runners   # docker build lab/*:local
+docker compose -f deploy/compose/docker-compose.yml --profile quality up -d
+docker compose -f deploy/compose/docker-compose.yml --profile org up -d
 ```

@@ -1,0 +1,27 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: org
+spec:
+  lab: org
+  adapter:
+    id: wordpress
+    config:
+      baseUrl: http://127.0.0.1:8080
+      # themeZip: /path/to/latte.zip
+  policy:
+    pack: wordpress-org
+  gates:
+    - id: C1-zip-lint
+      checks:
+        - id: zip-lint
+          runner: zip-lint
+          # themeZip taken from adapter metadata when set
+    - id: C2-theme-check
+      checks:
+        - id: theme-check
+          runner: theme-check
+    - id: C3-matrix
+      checks:
+        - id: url-matrix
+          runner: http-matrix

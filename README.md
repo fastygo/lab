@@ -2,12 +2,7 @@
 
 **Laboratory constructor framework** — Go orchestrator, Docker runners, pluggable lab packs.
 
-Not a fixed trio of checks. Near-term labs: WordPress.org readiness (`org`), security (`sec`), quality (`quality`). Later: runtime bake-offs, LLM compares, cloud load playgrounds, and more.
-
-## Status
-
-**Cycle A — Foundation:** domain, contracts, policy, orchestrator, CLI `demo` lab, Compose stubs.  
-See [.project/PROGRESS.md](.project/PROGRESS.md).
+Labs: `demo` · `quality` (L0) · `org` · `sec` — extensible for runtime bake-offs, LLM compares, load playgrounds, and more.
 
 ## Quick start
 
@@ -18,33 +13,56 @@ go run ./apps/cli labs
 go run ./apps/cli run -f testdata/manifests/demo.lab.yaml
 ```
 
+### Quality L0 (Lighthouse + axe)
+
+```bash
+make runners                                          # build images
+go run ./apps/cli run -f testdata/manifests/quality.lab.yaml
+# Without Docker: report includes runner.docker.unavailable (accepted by lightspeed pack)
+```
+
+### Org (zip-lint + Theme Check path)
+
+```bash
+# Set themeZip in org.lab.yaml adapter config, then:
+go run ./apps/cli run -f testdata/manifests/org.lab.yaml
+docker compose -f deploy/compose/docker-compose.yml --profile org up -d
+```
+
+### Sec (headers + WPScan)
+
+```bash
+go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
+# Point wordpress adapter baseUrl at a lab WP; WPScan needs Docker
+```
+
 ## Layout
 
 ```text
-packages/domain|contracts|policy|orchestrator
-packages/adapters/noop
-apps/cli                 # lab binary
-runners/                 # container contracts (tools in later cycles)
-deploy/compose/          # local lab profiles
-.project/                # knowledge base for agents & humans
-testdata/manifests/
+packages/domain|contracts|policy|orchestrator|registry
+packages/adapters/{noop,static,wordpress}
+apps/cli
+runners/{lighthouse,axe,theme-check,wpscan}
+deploy/compose/
+testdata/manifests|fixtures
+.project/
 ```
 
 ## Design
 
 - **Hexagonal + DDD** — checks never live in domain
-- **Adapters** prepare/serve targets (WordPress, static web, …)
-- **Runners** wrap real tools (Lighthouse, axe, WPScan, …)
-- **Policy** maps findings → decisions (`CUT_TARGET`, `SITE_DEFAULT_ON`, …)
-- Same **Manifest → Report** for local CLI and future SaaS workers
+- **Adapters** prepare/serve targets
+- **Runners** wrap tools (in-process or Docker)
+- **Policy** maps findings → decisions
+- Same **Manifest → Report** for local CLI and future SaaS
 
 ## Docs
 
 | Doc | Purpose |
 |-----|---------|
 | [.project/README.md](.project/README.md) | KB index |
-| [.project/architecture.md](.project/architecture.md) | Architecture |
-| [.project/labs.md](.project/labs.md) | Lab catalog |
+| [.project/PROGRESS.md](.project/PROGRESS.md) | Cycles A–D done; open E |
+| [.project/labs/](.project/labs/) | Lab specs |
 
 ## License
 

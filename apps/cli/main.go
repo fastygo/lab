@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fastygo/lab/packages/adapters/noop"
 	"github.com/fastygo/lab/packages/domain"
 	"github.com/fastygo/lab/packages/orchestrator"
 	"github.com/fastygo/lab/packages/orchestrator/memory"
-	"github.com/fastygo/lab/packages/orchestrator/stub"
+	"github.com/fastygo/lab/packages/registry"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -24,7 +23,7 @@ func main() {
 	case "version":
 		fmt.Printf("lab %s\n", version)
 	case "labs":
-		for _, id := range orchestrator.KnownLabs() {
+		for _, id := range registry.KnownLabs() {
 			fmt.Println(id)
 		}
 	case "run":
@@ -48,6 +47,8 @@ Usage:
   lab version
   lab labs
   lab run -f <manifest.yaml>
+
+Labs: demo, quality, org, sec
 
 `)
 }
@@ -73,9 +74,10 @@ func cmdRun(args []string) error {
 	if err != nil {
 		return err
 	}
+	root := registry.FindRepoRoot()
 	eng := orchestrator.New(
-		[]orchestrator.TargetAdapter{noop.New()},
-		[]orchestrator.Runner{stub.New()},
+		registry.DefaultAdapters(root),
+		registry.DefaultRunners(),
 		memory.New(),
 	)
 	report, err := eng.Run(context.Background(), m)
@@ -87,11 +89,8 @@ func cmdRun(args []string) error {
 	if err := enc.Encode(report); err != nil {
 		return err
 	}
-	switch report.Status {
-	case domain.StatusFail:
+	if report.Status == domain.StatusFail {
 		os.Exit(1)
-	case domain.StatusWarn:
-		os.Exit(0)
 	}
 	return nil
 }

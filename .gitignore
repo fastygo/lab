@@ -29,3 +29,6 @@ vendor/
 
 # Docker
 deploy/compose/data/
+
+# Space
+.manual

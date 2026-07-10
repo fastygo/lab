@@ -1,9 +1,15 @@
 # FastyGo Lab — local Compose profiles
 #
-# Profiles: smoke | org | sec | quality | full
-# Cycle A: network + documentation only. Real runners land in cycles B+.
+# Profiles: smoke | quality | org | sec | full
 #
-#   docker compose -f deploy/compose/docker-compose.yml --profile smoke config
+#   docker compose -f deploy/compose/docker-compose.yml --profile smoke up -d
+#   docker compose -f deploy/compose/docker-compose.yml --profile org up -d
+#
+# Build runners (from repo root):
+#   docker build -t lab/lighthouse:local runners/lighthouse
+#   docker build -t lab/axe:local runners/axe
+#   docker build -t lab/theme-check:local runners/theme-check
+#   docker build -t lab/wpscan:local runners/wpscan
 #
 # See .project/constructor/compose-profiles.md
 
@@ -13,9 +19,11 @@ networks:
   lab:
     driver: bridge
 
+volumes:
+  wp_org_data:
+  db_org_data:
+
 services:
-  # Placeholder so `docker compose config` succeeds with a profile.
-  # Replace with real targets/runners in later cycles.
   lab-smoke-stub:
     profiles: ["smoke"]
     image: alpine:3.20
@@ -23,14 +31,71 @@ services:
     command: ["sh", "-c", "echo 'FastyGo Lab smoke profile stub' && sleep infinity"]
     labels:
       lab.fastygo.dev/profile: smoke
-      lab.fastygo.dev/role: stub
 
-  # --- Future (documented; not started) ---
-  # wordpress-org:    profiles: [org, full]
-  # theme-check:      profiles: [org, full]
-  # wordpress-sec:    profiles: [sec, full]
-  # wpscan:           profiles: [sec, full]
-  # wordpress-quality:profiles: [quality, full]
-  # lighthouse:       profiles: [quality, full]
-  # vnu:              profiles: [quality, full]
-  # axe:              profiles: [quality, full]
+  lab-fixture:
+    profiles: ["quality", "full"]
+    image: nginx:1.27-alpine
+    networks: [lab]
+    volumes:
+      - ../../testdata/fixtures/quality-site:/usr/share/nginx/html:ro
+    ports:
+      - "8091:80"
+    labels:
+      lab.fastygo.dev/profile: quality
+      lab.fastygo.dev/role: fixture
+
+  db:
+    profiles: ["org", "sec", "full"]
+    image: mysql:8.0
+    networks: [lab]
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: wp
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_org_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  wordpress:
+    profiles: ["org", "sec", "full"]
+    image: wordpress:php8.2-apache
+    networks: [lab]
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wp
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: "0"
+    volumes:
+      - wp_org_data:/var/www/html
+      - ${LAB_THEME_ZIP_DIR:-../../testdata/fixtures/themes}:/themes:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    labels:
+      lab.fastygo.dev/role: wordpress
+
+  wpcli:
+    profiles: ["org", "sec", "full"]
+    image: wordpress:cli-php8.2
+    user: "33:33"
+    networks: [lab]
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: wp
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_org_data:/var/www/html
+    depends_on:
+      - wordpress
+    entrypoint: ["sleep", "infinity"]
+    labels:
+      lab.fastygo.dev/role: wpcli

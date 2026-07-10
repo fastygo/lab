@@ -1,0 +1,21 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: sec
+spec:
+  lab: sec
+  adapter:
+    id: wordpress
+    config:
+      baseUrl: http://127.0.0.1:8080
+  policy:
+    pack: secure-baseline
+  gates:
+    - id: S5-headers
+      checks:
+        - id: headers-recon
+          runner: headers
+    - id: S2-wpscan
+      checks:
+        - id: wpscan-enum
+          runner: wpscan

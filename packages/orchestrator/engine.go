@@ -107,7 +107,7 @@ func (e *Engine) Run(ctx context.Context, m *domain.Manifest) (*domain.Report, e
 	return report, nil
 }
 
-// Labs returns registered lab ids discovered from... (CLI lists known labs statically).
+// KnownLabs returns product lab ids (also exposed via packages/registry).
 func KnownLabs() []string {
-	return []string{"demo"}
+	return []string{"demo", "quality", "org", "sec"}
 }
