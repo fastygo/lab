@@ -1,0 +1,36 @@
+# FastyGo Lab — local Compose profiles
+#
+# Profiles: smoke | org | sec | quality | full
+# Cycle A: network + documentation only. Real runners land in cycles B+.
+#
+#   docker compose -f deploy/compose/docker-compose.yml --profile smoke config
+#
+# See .project/constructor/compose-profiles.md
+
+name: fastygo-lab
+
+networks:
+  lab:
+    driver: bridge
+
+services:
+  # Placeholder so `docker compose config` succeeds with a profile.
+  # Replace with real targets/runners in later cycles.
+  lab-smoke-stub:
+    profiles: ["smoke"]
+    image: alpine:3.20
+    networks: [lab]
+    command: ["sh", "-c", "echo 'FastyGo Lab smoke profile stub' && sleep infinity"]
+    labels:
+      lab.fastygo.dev/profile: smoke
+      lab.fastygo.dev/role: stub
+
+  # --- Future (documented; not started) ---
+  # wordpress-org:    profiles: [org, full]
+  # theme-check:      profiles: [org, full]
+  # wordpress-sec:    profiles: [sec, full]
+  # wpscan:           profiles: [sec, full]
+  # wordpress-quality:profiles: [quality, full]
+  # lighthouse:       profiles: [quality, full]
+  # vnu:              profiles: [quality, full]
+  # axe:              profiles: [quality, full]

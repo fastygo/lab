@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lab.fastygo.dev/schemas/lab-manifest.schema.json",
+  "title": "LabManifest",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": { "type": "string" },
+    "kind": { "const": "LabManifest" },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["lab", "adapter", "gates"],
+      "properties": {
+        "lab": { "type": "string" },
+        "adapter": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "string" },
+            "config": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        },
+        "gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "checks"],
+            "properties": {
+              "id": { "type": "string" },
+              "checks": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["id", "runner"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "runner": { "type": "string" },
+                    "config": { "type": "object", "additionalProperties": { "type": "string" } }
+                  }
+                }
+              },
+              "budgets": { "type": "array" }
+            }
+          }
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "pack": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

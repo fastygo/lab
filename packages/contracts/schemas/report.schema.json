@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lab.fastygo.dev/schemas/report.schema.json",
+  "title": "Report",
+  "type": "object",
+  "required": ["lab", "status", "startedAt", "finishedAt", "findings", "decisions", "summary"],
+  "properties": {
+    "lab": { "type": "string" },
+    "status": { "type": "string", "enum": ["pass", "warn", "fail"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "findings": { "type": "array" },
+    "decisions": { "type": "array" },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "critical": { "type": "integer" },
+        "high": { "type": "integer" },
+        "medium": { "type": "integer" },
+        "low": { "type": "integer" },
+        "info": { "type": "integer" },
+        "total": { "type": "integer" }
+      }
+    }
+  }
+}

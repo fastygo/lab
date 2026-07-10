@@ -1,0 +1,31 @@
+# Binaries / build
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Lab artifacts
+/artifacts/
+/reports/
+*.lab-report.json
+
+# Go
+vendor/
+
+# Docker
+deploy/compose/data/

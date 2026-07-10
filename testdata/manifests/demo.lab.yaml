@@ -1,0 +1,27 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: demo
+spec:
+  lab: demo
+  adapter:
+    id: noop
+    config:
+      baseUrl: http://127.0.0.1:9
+  policy:
+    pack: default
+  gates:
+    - id: G0-smoke
+      checks:
+        - id: ping
+          runner: stub
+          config:
+            code: demo.stub.ok
+            severity: info
+            message: Demo stub runner ping
+        - id: hint
+          runner: stub
+          config:
+            code: demo.stub.hint
+            severity: info
+            message: Demo framework is ready for real runners
