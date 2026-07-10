@@ -32,6 +32,8 @@ Read this first, then [PROGRESS.md](./PROGRESS.md), then the open cycle.
 | [labs/org.md](./labs/org.md) | WordPress.org readiness lab |
 | [labs/sec.md](./labs/sec.md) | Security / hardening lab |
 | [labs/quality.md](./labs/quality.md) | Lighthouse / W3C / ARIA / SEO lab |
+| [check/](./check/) | Product checklists (theme / validate / security) |
+| [check/audit-progress.md](./check/audit-progress.md) | **Full check coverage** `[x]` / `[~]` / `[ ]` |
 
 ## Hard rules
 

@@ -1,20 +1,21 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-10 (Cycles B–D)  
+**Last updated:** 2026-07-10 (Gate 1 zip-lint complete; check coverage SSOT)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
+
+**Check coverage (full item list):** [check/audit-progress.md](./check/audit-progress.md) — mark `[x]`/`[~]`/`[ ]` there so nothing is forgotten.
 
 ---
 
 ## Open cycle
 
-**→ Cycle E — static-web adapters** (React/Vue/Svelte)
+**→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-Suggested next:
-
-1. Cycle E — `static-web` adapter + framework presets
-2. Cycle F — SaaS API + worker
-3. Quality L1 — vnu / stylelint / Q2–Q6
+1. Org Gate 2 — headless Theme Check on compose  
+2. Org Gate 3 — Unit Test import + HTTP smoke  
+3. Quality Q2/Q3 — vnu + stylelint  
+4. Cycle E — static-web adapters (React/Vue/Svelte)
 
 ---
 
