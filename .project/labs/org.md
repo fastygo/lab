@@ -34,13 +34,25 @@ Prove a classic theme zip is ready for WordPress.org Theme Directory review.
 
 `wordpress-org` → `FIX_THEME`, `BLOCK_TAG`, `ACCEPT` as appropriate.
 
-## Status (Cycle C)
+## Status (Cycle C + Gate 1 P0)
 
-- **zip-lint** in-process runner + tests (`org.zip.*`)
+- **zip-lint** implements full Gate 1 from `.project/check/theme-check.md`:
+  - required files (`style.css`, `readme.txt`, `LICENSE`, `screenshot`, `functions.php`)
+  - forbidden paths (`.git`, `.cursor`, `node_modules`, monorepo dirs, OS junk)
+  - forbidden extensions (`.xml` allowlist, `.sh`, `.sql`, nested `.zip`)
+  - screenshot ≤1200×900 ~4:3
+  - `style.css` headers: Version, Requires at least, Tested up to, Requires PHP, Text Domain **= folder slug**
+  - tags: block `accessibility-ready` / `e-commerce` unless config allows
+  - Resources section vs `assets/` + `lib/` attribution
+  - minified twin rule (`*.min.js/css` → source)
+  - policy scan: CPT, shortcode, woocommerce, comments_template, contact-form patterns
 - **theme-check** Docker/compose path (`runners/theme-check`, profile `org`)
 - **http-matrix** records adapter URL matrix
 - Manifest: `testdata/manifests/org.lab.yaml`
 - Policy pack: `wordpress-org`
 
+Config knobs on the check: `allowAccessibilityReady`, `allowEcommerce`, `skipPolicyScan`.
+
 Set `spec.adapter.config.themeZip` to a theme zip path before expecting zip-lint to pass.
+
 

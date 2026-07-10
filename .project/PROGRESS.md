@@ -73,6 +73,7 @@ A Foundation ✓
 | Stage | Task | Done |
 |-------|------|------|
 | C1 | In-process zip-lint + fixtures/tests | [x] |
+| C1+ | Gate 1 full zip-lint (ext, Resources, policy, min twins, slug) | [x] |
 | C2 | Compose `org` + theme-check runner | [x] |
 | C3 | `org.lab.yaml` + http-matrix + wordpress-org policy | [x] |
 
@@ -97,7 +98,7 @@ A Foundation ✓
 | 2026-07 | First runnable lab = `demo`; real tools in B+ |
 | 2026-07 | Quality L0 uses static fixture; WP stub for later compose |
 | 2026-07 | Missing Docker → finding `runner.docker.unavailable` (no panic) |
-| 2026-07 | Zip-lint in-process; Theme Check / WPScan via Docker |
+| 2026-07 | Zip-lint Gate 1 P0: full packaging checklist from `.project/check/theme-check.md` |
 | 2026-07 | Policy packs: default, lightspeed, wordpress-org, secure-baseline |
 
 ---

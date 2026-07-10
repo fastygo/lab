@@ -105,8 +105,16 @@ func (e *Engine) Map(findings []domain.Finding) []domain.Decision {
 
 func heuristic(pack, code string) *domain.Decision {
 	switch {
-	case pack == "wordpress-org" && (hasPrefix(code, "org.zip.missing_") || hasPrefix(code, "org.zip.forbidden_") || hasPrefix(code, "org.zip.screenshot_") || hasPrefix(code, "org.zip.style_")):
-		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme packaging issue"}
+	case pack == "wordpress-org" && (hasPrefix(code, "org.zip.missing_") ||
+		hasPrefix(code, "org.zip.forbidden_") ||
+		hasPrefix(code, "org.zip.screenshot_") ||
+		hasPrefix(code, "org.zip.style_") ||
+		hasPrefix(code, "org.zip.tag_") ||
+		hasPrefix(code, "org.zip.resources_") ||
+		hasPrefix(code, "org.zip.minified_") ||
+		hasPrefix(code, "org.zip.nested_") ||
+		hasPrefix(code, "org.zip.policy_")):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme packaging / Gate 1 issue"}
 	case pack == "lightspeed" && hasPrefix(code, "quality.axe.") && code != "quality.axe.ok":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Axe violation"}
 	case pack == "secure-baseline" && hasPrefix(code, "sec.recon."):
