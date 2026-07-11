@@ -97,6 +97,25 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 		env = append(env, "LAB_THEME_ZIP=/lab/theme.zip")
 	}
 
+	// Optional fixtures dir (Theme Unit Test XML, seed out).
+	if fixtures := firstNonEmpty(req.Check.Config["fixturesDir"], os.Getenv("LAB_FIXTURES_DIR")); fixtures != "" {
+		abs, err := filepath.Abs(fixtures)
+		if err == nil {
+			fixtures = abs
+		}
+		args = append(args, "-v", fixtures+":/lab/fixtures:ro")
+		env = append(env, "LAB_UNIT_TEST_XML=/lab/fixtures/themeunittestdata.wordpress.xml")
+	}
+	if seedOut := firstNonEmpty(req.Check.Config["seedOut"], os.Getenv("LAB_SEED_OUT")); seedOut != "" {
+		abs, err := filepath.Abs(seedOut)
+		if err == nil {
+			seedOut = abs
+		}
+		_ = os.MkdirAll(seedOut, 0o755)
+		args = append(args, "-v", seedOut+":/lab/seed-out")
+		env = append(env, "LAB_SEED_HOST_OUT=/lab/seed-out/org-seed.json")
+	}
+
 	// Optional WP data volume (compose org profile) so theme-check shares files with wordpress.
 	if vol := firstNonEmpty(req.Check.Config["wpDataVolume"], os.Getenv("LAB_WP_DATA_VOLUME")); vol != "" {
 		args = append(args, "-v", vol+":/var/www/html")
@@ -104,6 +123,13 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 
 	network := firstNonEmpty(req.Check.Config["dockerNetwork"], os.Getenv("LAB_DOCKER_NETWORK"), "host")
 	args = append(args, "--network", network)
+
+	// Pass matrix URLs for notice-hunter (and similar).
+	if len(req.URLs) > 0 {
+		if b, err := json.Marshal(req.URLs); err == nil {
+			env = append(env, "LAB_MATRIX_URLS="+string(b))
+		}
+	}
 
 	for _, e := range env {
 		args = append(args, "-e", e)

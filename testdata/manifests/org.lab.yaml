@@ -9,6 +9,7 @@ spec:
     config:
       baseUrl: http://127.0.0.1:8080
       themeZip: testdata/dist/latte.zip
+      seedFile: testdata/fixtures/org-seed.json
   policy:
     pack: wordpress-org
   gates:
@@ -25,7 +26,15 @@ spec:
             dockerNetwork: fastygo-lab_lab
             wpDataVolume: fastygo-lab_wp_org_data
             internalUrl: http://wordpress
+            fixturesDir: testdata/fixtures
+            seedOut: testdata/fixtures
     - id: C3-matrix
       checks:
         - id: url-matrix
           runner: http-matrix
+        - id: notice-hunter
+          runner: notice-hunter
+          config:
+            dockerNetwork: fastygo-lab_lab
+            wpDataVolume: fastygo-lab_wp_org_data
+            internalUrl: http://wordpress

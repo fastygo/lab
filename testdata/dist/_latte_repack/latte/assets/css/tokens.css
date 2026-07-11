@@ -1,0 +1,127 @@
+/**
+ * Style preset: default — shadcn-compatible CSS variables.
+ * Consumed by theme CSS build (@import + Tailwind @theme).
+ */
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.prose :where(p, ul, ol) {
+  margin-bottom: 1rem;
+  line-height: 1.625;
+}
+
+.prose :where(a) {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Chrome helpers used by layout parts */
+.site-header form,
+.site-footer .widget {
+  max-width: 100%;
+}
+
+/*
+ * Layout utilities missing from the shipped theme.min.css scan.
+ * Without these, classic aside stays width:100% inside a flex row and overflows.
+ */
+.w-64 {
+  width: 16rem;
+}
+.min-w-0 {
+  min-width: 0;
+}
+.max-w-full {
+  max-width: 100%;
+}
+@media (min-width: 48rem) {
+  .md\:w-64 {
+    width: 16rem;
+  }
+}
+
+.site-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+.site-shell > .site-content {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.site-sidebar {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.site-sidebar .widget,
+.site-sidebar .wp-block-group,
+.site-sidebar .wp-block-search,
+.site-sidebar .wp-block-search__inside-wrapper {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.site-sidebar .wp-block-search__input {
+  min-width: 0 !important;
+  max-width: 100%;
+}
+
+/* Nested block containers inside the shell column must not fight the flex row */
+.site-shell .site-content > * .container {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+.post-pages a {
+  margin-inline-end: 0.5rem;
+  color: var(--primary);
+}

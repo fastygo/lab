@@ -1,0 +1,54 @@
+{**
+ * Block: featured-grid — UI8Kit Card + Image primitives.
+ * Context: posts[], labels
+ *}
+{if isset($posts) && count($posts) > 0}
+	{capture $cards}
+		{foreach $posts as $post}
+			{capture $cardBody}
+				{if !empty($post['thumbnail']['url'])}
+					{capture $thumb}
+						{include 'image/Image.latte',
+							src: $post['thumbnail']['url'],
+							alt: $post['thumbnail']['alt'] ?? '',
+							width: (string) ($post['thumbnail']['width'] ?? ''),
+							height: (string) ($post['thumbnail']['height'] ?? ''),
+							srcset: $post['thumbnail']['srcset'] ?? '',
+							sizes: $post['thumbnail']['sizes'] ?? '',
+							class: 'aspect-video w-full object-cover',
+							loading: 'lazy'
+						}
+					{/capture}
+					{include 'link/Link.latte', href: $post['url'], class: 'block overflow-hidden', children: (string) $thumb}
+				{/if}
+				{capture $postTitle}{$post['title']}{/capture}
+				{capture $cardTitle}
+					{include 'link/Link.latte', href: $post['url'], size: 'lg', class: 'no-underline hover:text-primary', children: (string) $postTitle}
+				{/capture}
+				{capture $headerInner}
+					{include 'card/CardTitle.latte', class: 'text-xl tracking-tight', children: (string) $cardTitle}
+				{/capture}
+				{include 'card/CardHeader.latte', children: (string) $headerInner}
+
+				{if !empty($post['excerpt'])}
+					{capture $excerptHtml}<p class="text-sm text-muted-foreground">{$post['excerpt']}</p>{/capture}
+					{include 'card/CardContent.latte', children: (string) $excerptHtml}
+				{/if}
+			{/capture}
+			{include 'card/Card.latte', class: 'overflow-hidden', children: (string) $cardBody}
+		{/foreach}
+	{/capture}
+
+	{capture $sectionInner}
+		{capture $heading}{$labels['featured'] ?? 'Featured'}{/capture}
+		{include 'title/Title.latte', as: 2, class: 'mb-2 text-center text-3xl font-bold tracking-tight', children: (string) $heading}
+		<p class="mb-10 text-center text-muted-foreground">{$labels['latest_articles'] ?? 'Latest articles'}</p>
+		{include 'grid/Grid.latte', class: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3', children: (string) $cards}
+	{/capture}
+
+	{capture $sectionBox}
+		{include 'box/Box.latte', class: 'container mx-auto px-4 md:px-6', children: (string) $sectionInner}
+	{/capture}
+
+	{include 'block/Block.latte', tag: 'section', class: 'bg-card py-16', children: (string) $sectionBox}
+{/if}

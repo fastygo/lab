@@ -65,6 +65,10 @@ func (e *Engine) Run(ctx context.Context, m *domain.Manifest) (*domain.Report, e
 
 	var findings []domain.Finding
 	for _, gate := range m.Spec.Gates {
+		// Refresh matrix before each gate so seed from earlier gates (e.g. theme-check) expands URLs.
+		if refreshed, err := adapter.Matrix(ctx); err == nil {
+			urls = refreshed
+		}
 		for _, check := range gate.Checks {
 			runner, ok := e.runners[check.Runner]
 			if !ok {

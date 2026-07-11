@@ -48,6 +48,8 @@ func packRules(pack string) []Rule {
 			{Code: "org.matrix.listed", Basket: domain.BasketAccept, Rationale: "Matrix recorded"},
 			{Code: "org.matrix.ok", Basket: domain.BasketAccept, Rationale: "HTTP smoke OK"},
 			{Code: "org.matrix.smoke_summary", Basket: domain.BasketAccept, Rationale: "HTTP smoke summary"},
+			{Code: "org.notice.ok", Basket: domain.BasketAccept, Rationale: "No theme debug notices"},
+			{Code: "org.notice.summary", Basket: domain.BasketAccept, Rationale: "Notice hunter summary"},
 			{Code: "org.themecheck.ok", Basket: domain.BasketAccept, Rationale: "Theme Check clean"},
 			{Code: "org.themecheck.no_required", Basket: domain.BasketAccept, Rationale: "No Theme Check required errors"},
 			{Code: "org.themecheck.plugin_ready", Basket: domain.BasketAccept, Rationale: "Theme Check installed"},
@@ -130,6 +132,8 @@ func heuristic(pack, code string) *domain.Decision {
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "HTTP smoke failure"}
 	case pack == "wordpress-org" && code == "org.matrix.soft_404":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Soft-404 — review template"}
+	case pack == "wordpress-org" && code == "org.notice.found":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme PHP Notice/Warning/Deprecated under WP_DEBUG"}
 	case pack == "lightspeed" && hasPrefix(code, "quality.axe.") && code != "quality.axe.ok":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Axe violation"}
 	case pack == "lightspeed" && (code == "quality.vnu.error" || code == "quality.vnu.fetch_failed" || code == "quality.vnu.exec_failed" || code == "quality.vnu.parse_failed"):

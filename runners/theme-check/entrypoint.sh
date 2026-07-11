@@ -84,6 +84,10 @@ if [ -n "$ZIP" ] && [ -f "$ZIP" ]; then
     findings_error "org.themecheck.theme_install_failed" "high" "failed to activate theme: $THEME_ROOT"
     exit 0
   }
+  # Latte (and similar engines) need a writable compile cache under the theme.
+  # wordpress:php8.2-apache runs as uid 33; cli image maps www-data to 82 — use numeric ids.
+  mkdir -p "/var/www/html/wp-content/themes/${THEME_ROOT}/~cache"
+  chown -R 33:33 "/var/www/html/wp-content/themes/${THEME_ROOT}" || true
 elif [ -n "$ZIP" ]; then
   findings_error "org.themecheck.theme_zip_missing" "high" "LAB_THEME_ZIP not found: $ZIP"
   exit 0
@@ -93,6 +97,11 @@ SLUG="$(wp theme list --status=active --field=name --allow-root 2>/dev/null || t
 if [ -z "$SLUG" ]; then
   findings_error "org.themecheck.no_active_theme" "high" "no active theme"
   exit 0
+fi
+
+# Gate 3 prep: Theme Unit Test XML import (idempotent) + seed JSON for matrix.
+if [ -x /runner/seed-unit-test.sh ]; then
+  /runner/seed-unit-test.sh >/tmp/lab-seed.json 2>/tmp/lab-seed.err || true
 fi
 
 wp plugin install theme-check --activate --force --allow-root >/dev/null 2>&1 || true

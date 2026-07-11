@@ -38,3 +38,40 @@ func TestPrepareResolvesRelativeThemeZip(t *testing.T) {
 		t.Fatalf("matrix too small: %v", urls)
 	}
 }
+
+func TestMatrixIncludesAttachmentWhenSeeded(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	seed := filepath.Join(dir, "org-seed.json")
+	if err := os.WriteFile(seed, []byte(`{"attachmentId":"42","postId":"7","pageId":"9","catId":"3","tagSlug":"markup","imported":true}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	a := wordpress.New(dir)
+	if err := a.Prepare(context.Background(), map[string]string{
+		"baseUrl":  "http://127.0.0.1:8080",
+		"seedFile": seed,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	urls, err := a.Matrix(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantAttach := "http://127.0.0.1:8080/?attachment_id=42"
+	wantPost := "http://127.0.0.1:8080/?p=7"
+	var hasAttach, hasPost bool
+	for _, u := range urls {
+		if u == wantAttach {
+			hasAttach = true
+		}
+		if u == wantPost {
+			hasPost = true
+		}
+	}
+	if !hasAttach {
+		t.Fatalf("missing attachment URL in %v", urls)
+	}
+	if !hasPost {
+		t.Fatalf("missing seeded post URL in %v", urls)
+	}
+}

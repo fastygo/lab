@@ -1,0 +1,43 @@
+{**
+ * Site header — classic top nav + mobile sheet trigger.
+ *}
+<a class="skip-link screen-reader-text" href="#content">{$labels['skip_to_content']}</a>
+
+<header class="site-header border-b border-border bg-background">
+	<div class="container mx-auto flex h-16 items-center justify-between gap-4 px-4 md:px-6">
+		<div class="flex items-center gap-3">
+			{if !empty($menu['primary']['items'])}
+				<button
+					type="button"
+					id="{$sheet['trigger']}"
+					class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-sm md:hidden"
+					data-ui8kit-dialog-open="true"
+					data-ui8kit-dialog-target="{$sheet['panel']}"
+					aria-controls="{$sheet['panel']}"
+					aria-haspopup="dialog"
+					aria-expanded="false"
+					aria-label="{$labels['open_menu']}"
+				>
+					<span aria-hidden="true">☰</span>
+				</button>
+			{/if}
+			{include 'brand.latte'}
+		</div>
+
+		{if !empty($menu['primary']['items'])}
+			<nav class="hidden md:block" aria-label="{$labels['primary_nav']}">
+				{include 'nav-items.latte',
+					items: $menu['primary']['items'],
+					listClass: 'flex items-center gap-6',
+					linkClass: 'text-sm font-medium text-muted-foreground no-underline hover:text-foreground'
+				}
+			</nav>
+		{/if}
+
+		<div class="hidden md:block">
+			{include 'blocks/search-form.latte'}
+		</div>
+	</div>
+</header>
+
+{include 'mobile-sheet.latte'}

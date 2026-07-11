@@ -1,6 +1,6 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-10 (Org Gate 2/3 HTTP smoke + Quality Q2 vnu)  
+**Last updated:** 2026-07-11 (Org Gate 3 Unit Test XML + attachment + notice hunter)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
 
@@ -12,7 +12,7 @@
 
 **→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-1. Org Gate 3 remainder — Theme Unit Test XML import + notice hunter  
+1. Org Gate 4 — Playwright keyboard (skip / nav / sheet / search)  
 2. Quality Q3 — stylelint  
 3. Sec S1 — user enum + sensitive files + REST  
 4. Cycle E — static-web adapters (React/Vue/Svelte)
@@ -78,6 +78,7 @@ A Foundation ✓
 | C1+ | Gate 1 full zip-lint (ext, Resources, policy, min twins, slug) | [x] |
 | C2 | Compose `org` + Theme Check headless (zip install) | [x] |
 | C3 | HTTP smoke asserts on URL matrix + wordpress-org policy | [x] |
+| C3+ | Theme Unit Test XML seed + attachment URL + notice hunter | [x] |
 
 ---
 
@@ -104,6 +105,7 @@ A Foundation ✓
 | 2026-07 | Policy packs: default, lightspeed, wordpress-org, secure-baseline |
 | 2026-07 | Gate 2: theme zip mounted into theme-check container; share compose WP volume/network |
 | 2026-07 | Gate 3: `http-matrix` performs real GET asserts (not list-only) |
+| 2026-07-11 | Gate 3+: Unit Test XML in fixtures; seed from theme-check; notice-hunter Docker runner |
 
 ---
 
@@ -117,7 +119,8 @@ go run ./apps/cli run -f testdata/manifests/quality.lab.yaml   # needs Docker im
 go run ./apps/cli run -f testdata/manifests/org.lab.yaml       # themeZip=testdata/dist/latte.zip
 go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
-make runners   # docker build lab/*:local (incl. theme-check, vnu)
+make runners   # docker build lab/*:local (incl. theme-check, vnu, notice-hunter)
 make org-up    # compose --profile org
+make org-seed  # import Theme Unit Test XML + write org-seed.json
 make quality-up
 ```

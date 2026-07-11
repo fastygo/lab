@@ -4,7 +4,7 @@
 Update this file when a check lands in code. Cycle roadmap stays in [../PROGRESS.md](../PROGRESS.md).
 
 **Legend:** `[x]` implemented · `[~]` partial / scaffold · `[ ]` not started  
-**Last audited:** 2026-07-10 (Gate 2/3 + Q2)
+**Last audited:** 2026-07-11 (Gate 3 Unit Test XML + attachment + notice hunter)
 
 ---
 
@@ -64,23 +64,23 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Check | Status | Notes |
 |-------|--------|-------|
 | Compose profile `org` (db + wordpress + wpcli) | [x] | `deploy/compose`; `make org-up` |
-| Install theme from zip (not monorepo bind) | [x] | docker runner mounts `themeZip` → `/lab/theme.zip`; `wp theme install` |
+| Install theme from zip (not monorepo bind) | [x] | docker runner mounts `themeZip` → `/lab/theme.zip`; unzip+activate |
 | Install + activate Theme Check plugin | [x] | `runners/theme-check/entrypoint.sh` |
 | Headless Theme Check → 0 required errors | [x] | CLI or `run-check.php` eval-file; findings `org.themecheck.*` |
 | Parse required vs recommended | [x] | PHP `to-findings.php` + Go `themecheck.ParseJSON` |
-| WP_DEBUG log capture for theme | [ ] | Overlaps Gate 3c |
+| WP_DEBUG log capture for theme | [x] | compose `WP_DEBUG_LOG`; Gate 3c `notice-hunter` |
 
 ### Gate 3 — Theme Unit Test + templates
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Import Theme Unit Test XML | [ ] | |
-| Cache XML in lab fixtures (not theme zip) | [ ] | |
+| Import Theme Unit Test XML | [x] | `runners/theme-check/seed-unit-test.sh` + `make org-seed` |
+| Cache XML in lab fixtures (not theme zip) | [x] | `testdata/fixtures/themeunittestdata.wordpress.xml` |
 | HTTP smoke: front, home, single, page | [x] | `http-matrix` GET + status asserts |
-| HTTP smoke: category, tag, author, search, 404, attachment | [~] | matrix covers cat/tag/author/search/404; attachment not yet |
-| URL matrix listed on adapter | [x] | wordpress adapter `Matrix()` |
+| HTTP smoke: category, tag, author, search, 404, attachment | [x] | matrix + `org-seed.json` attachmentId |
+| URL matrix listed on adapter | [x] | wordpress adapter `Matrix()` (reloaded per gate) |
 | `http-matrix` records URLs as findings | [x] | real HTTP asserts (`org.matrix.ok` / `status_*`); `listOnly=true` for list mode |
-| Notice hunter (`debug.log`) | [ ] | |
+| Notice hunter (`debug.log`) | [x] | runner `notice-hunter` → `org.notice.*` |
 
 ### Gate 4 — Keyboard / a11y chrome
 
@@ -249,10 +249,10 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. **Org Gate 3** — Theme Unit Test XML import + attachment URL + notice hunter  
+1. **Org Gate 4** — Playwright keyboard (skip link, nav, sheet, search)  
 2. **Quality Q3** — stylelint; then WP target for Q1/Q4  
 3. **Sec S1** — user enum + sensitive files + REST  
-4. **Org Gate 4** — Playwright keyboard  
+4. **wpfasty** `theme:verify` client  
 
 ---
 
@@ -261,7 +261,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Area | Done | Partial | Todo |
 |------|------|---------|------|
 | Org Gate 1 | 25 | 0 | 1 (wpfasty audit.json) |
-| Org Gate 2–4 | 7 | 1 | ~8 |
+| Org Gate 2–4 | 14 | 0 | ~4 (Gate 4 Playwright) |
 | Quality Q1–Q6 | 10 | 1 | ~13 |
 | Sec S1–S5 | 6 | 2 | ~15 |
 | Framework | 8 | 0 | 2 |

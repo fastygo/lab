@@ -33,6 +33,7 @@ func DefaultRunners() []orchestrator.Runner {
 	tcImage := envOr("LAB_THEMECHECK_IMAGE", "lab/theme-check:local")
 	vnuImage := envOr("LAB_VNU_IMAGE", "lab/vnu:local")
 	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "wpscanteam/wpscan:latest")
+	noticeImage := envOr("LAB_NOTICE_HUNTER_IMAGE", "lab/notice-hunter:local")
 
 	return []orchestrator.Runner{
 		stub.New(),
@@ -44,6 +45,7 @@ func DefaultRunners() []orchestrator.Runner {
 		docker.New("theme-check", tcImage),
 		docker.New("vnu", vnuImage),
 		docker.New("wpscan", wpscanImage),
+		docker.New("notice-hunter", noticeImage),
 	}
 }
 

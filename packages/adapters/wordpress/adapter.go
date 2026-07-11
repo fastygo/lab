@@ -2,6 +2,7 @@ package wordpress
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,6 +15,17 @@ type Adapter struct {
 	repoRoot string
 	baseURL  string
 	themeZip string
+	seedPath string
+	seed     orgSeed
+}
+
+type orgSeed struct {
+	AttachmentID string `json:"attachmentId"`
+	PostID       string `json:"postId"`
+	PageID       string `json:"pageId"`
+	CatID        string `json:"catId"`
+	TagSlug      string `json:"tagSlug"`
+	Imported     bool   `json:"imported"`
 }
 
 func New(repoRoot string) *Adapter {
@@ -39,7 +51,57 @@ func (a *Adapter) Prepare(_ context.Context, config map[string]string) error {
 		}
 		a.themeZip = resolved
 	}
+	a.seedPath = config["seedFile"]
+	if a.seedPath == "" {
+		a.seedPath = filepath.Join(a.repoRoot, "testdata", "fixtures", "org-seed.json")
+	} else if !filepath.IsAbs(a.seedPath) && a.repoRoot != "" {
+		a.seedPath = filepath.Join(a.repoRoot, a.seedPath)
+	}
+	a.seed = loadSeed(a.seedPath)
+	// Config overrides for matrix IDs (useful in tests).
+	if v := config["attachmentId"]; v != "" {
+		a.seed.AttachmentID = v
+	}
+	if v := config["postId"]; v != "" {
+		a.seed.PostID = v
+	}
+	if v := config["pageId"]; v != "" {
+		a.seed.PageID = v
+	}
+	if v := config["catId"]; v != "" {
+		a.seed.CatID = v
+	}
+	if v := config["tagSlug"]; v != "" {
+		a.seed.TagSlug = v
+	}
 	return nil
+}
+
+func loadSeed(path string) orgSeed {
+	s := orgSeed{
+		PostID:  "1",
+		PageID:  "2",
+		CatID:   "1",
+		TagSlug: "test",
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return s
+	}
+	_ = json.Unmarshal(b, &s)
+	if s.PostID == "" {
+		s.PostID = "1"
+	}
+	if s.PageID == "" {
+		s.PageID = "2"
+	}
+	if s.CatID == "" {
+		s.CatID = "1"
+	}
+	if s.TagSlug == "" {
+		s.TagSlug = "test"
+	}
+	return s
 }
 
 func resolveThemeZip(zip, repoRoot string) (string, error) {
@@ -76,23 +138,33 @@ func (a *Adapter) Serve(_ context.Context) (domain.Target, error) {
 	if a.themeZip != "" {
 		meta["themeZip"] = a.themeZip
 	}
+	if a.seedPath != "" {
+		meta["seedFile"] = a.seedPath
+	}
 	return domain.Target{BaseURL: a.baseURL, Metadata: meta}, nil
 }
 
 func (a *Adapter) Matrix(_ context.Context) ([]string, error) {
+	// Reload seed each call so Gate 2 seed can expand URLs before Gate 3.
+	if a.seedPath != "" {
+		a.seed = loadSeed(a.seedPath)
+	}
 	// Query-string URLs work without Apache rewrite/.htaccess (compose org default).
-	// Pretty permalinks are covered after Unit Test import + rewrite flush (Gate 3+).
 	b := a.baseURL
-	return []string{
+	urls := []string{
 		b + "/",
-		b + "/?p=1",
-		b + "/?page_id=2",
-		b + "/?cat=1",
-		b + "/?tag=test",
+		b + "/?p=" + a.seed.PostID,
+		b + "/?page_id=" + a.seed.PageID,
+		b + "/?cat=" + a.seed.CatID,
+		b + "/?tag=" + a.seed.TagSlug,
 		b + "/?author=1",
 		b + "/?s=hello",
 		b + "/?p=999999&lab-404=1",
-	}, nil
+	}
+	if a.seed.AttachmentID != "" {
+		urls = append(urls, b+"/?attachment_id="+a.seed.AttachmentID)
+	}
+	return urls, nil
 }
 
 func (a *Adapter) Teardown(_ context.Context) error { return nil }

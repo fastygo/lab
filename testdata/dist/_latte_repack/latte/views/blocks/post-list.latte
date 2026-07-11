@@ -1,0 +1,49 @@
+{**
+ * Block: post-list
+ * Context: posts[], pagination, labels
+ *}
+{capture $list}
+	{if empty($posts)}
+		<p class="py-16 text-center text-muted-foreground">{$labels['no_posts'] ?? 'No posts found.'}</p>
+	{else}
+		{capture $cards}
+			{foreach $posts as $post}
+				{capture $body}
+					{capture $postTitle}{$post['title']}{/capture}
+					{capture $t}{include 'link/Link.latte', href: $post['url'], size: 'lg', class: 'no-underline hover:text-primary', children: (string) $postTitle}{/capture}
+					{capture $h}{include 'card/CardTitle.latte', class: 'text-xl tracking-tight', children: (string) $t}{/capture}
+					{include 'card/CardHeader.latte', children: (string) $h}
+					{if !empty($post['excerpt'])}
+						{capture $ex}<p class="text-sm text-muted-foreground">{$post['excerpt']}</p>{/capture}
+						{include 'card/CardContent.latte', children: (string) $ex}
+					{/if}
+					{if !empty($post['date']['display'])}
+						{capture $ft}<time datetime="{$post['date']['iso'] ?? ''}" class="text-xs text-muted-foreground">{$post['date']['display']}</time>{/capture}
+						{include 'card/CardFooter.latte', children: (string) $ft}
+					{/if}
+				{/capture}
+				{include 'card/Card.latte', class: $post['post_class'] ?? '', children: (string) $body}
+			{/foreach}
+		{/capture}
+		{include 'stack/Stack.latte', class: 'gap-6', children: (string) $cards}
+	{/if}
+
+	{if !empty($pagination)}
+		<nav class="mt-10 flex justify-center gap-4" aria-label="{$labels['pagination'] ?? 'Pagination'}">
+			{if $pagination['prev_url']}
+				{capture $prevL}{$labels['previous'] ?? 'Previous'}{/capture}
+				{include 'link/Link.latte', href: $pagination['prev_url'], class: 'text-sm text-primary', children: (string) $prevL}
+			{/if}
+			<span class="text-sm text-muted-foreground">{$pagination['current']} / {$pagination['total']}</span>
+			{if $pagination['next_url']}
+				{capture $nextL}{$labels['next'] ?? 'Next'}{/capture}
+				{include 'link/Link.latte', href: $pagination['next_url'], class: 'text-sm text-primary', children: (string) $nextL}
+			{/if}
+		</nav>
+	{/if}
+{/capture}
+
+{capture $box}
+	{include 'box/Box.latte', class: 'container mx-auto px-4 py-12 md:px-6', children: (string) $list}
+{/capture}
+{include 'block/Block.latte', tag: 'section', children: (string) $box}

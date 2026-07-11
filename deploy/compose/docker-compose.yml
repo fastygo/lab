@@ -78,11 +78,25 @@ services:
       WORDPRESS_DB_USER: wp
       WORDPRESS_DB_PASSWORD: wp
       WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DEBUG: "0"
+      WORDPRESS_DEBUG: "1"
+      # Public URL for asset links (CSS/JS). Override for remote lab hosts:
+      #   LAB_WP_URL=http://5.129.242.217:8080 docker compose ... up -d
+      LAB_WP_URL: ${LAB_WP_URL:-http://127.0.0.1:8080}
+      # $$ → literal $ for PHP (compose must not interpolate)
+      WORDPRESS_CONFIG_EXTRA: |
+        if ($$u = getenv('LAB_WP_URL')) {
+          define('WP_HOME', $$u);
+          define('WP_SITEURL', $$u);
+        }
+        define('WP_DEBUG', true);
+        define('WP_DEBUG_LOG', true);
+        define('WP_DEBUG_DISPLAY', false);
+        @ini_set('display_errors', 0);
     volumes:
       - wp_org_data:/var/www/html
       # Theme zips for manual wpcli install; Gate 2 mounts zip via docker runner
       - ${LAB_THEME_ZIP_DIR:-../../testdata/dist}:/themes:ro
+      - ../../testdata/fixtures:/lab/fixtures:ro
     depends_on:
       db:
         condition: service_healthy
@@ -102,6 +116,7 @@ services:
     volumes:
       - wp_org_data:/var/www/html
       - ${LAB_THEME_ZIP_DIR:-../../testdata/dist}:/themes:ro
+      - ../../testdata/fixtures:/lab/fixtures:ro
     depends_on:
       - wordpress
     entrypoint: ["sleep", "infinity"]
