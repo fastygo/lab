@@ -219,7 +219,7 @@ Until then, treat **§1–§7** as the supported clean-VPS path.
 
 Product roadmap (API, workers, dashboard events, schedules, Telegram/Slack):
 
-→ **[cycle-f-saas.md](./cycle-f-saas.md)**
+→ **[cycle-f-saas.md](./cycle-f-saas.md)** · isolation notes: **[f2-isolation.md](./f2-isolation.md)**
 
 Workers reuse images from `make runners` and compose profiles from this runbook.
 

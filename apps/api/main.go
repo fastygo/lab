@@ -24,7 +24,7 @@ import (
 // Store: memory by default; Postgres when LAB_DATABASE_URL or DATABASE_URL is set
 // (postgres://… connection URI — same idea as Supabase).
 // Spec: .project/vps/cycle-f-saas.md
-const version = "0.1.0-f1"
+const version = "0.1.0-f2"
 
 type server struct {
 	store    runstore.Store
@@ -122,7 +122,7 @@ func (s *server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 		"ok":      true,
 		"service": "lab-api",
 		"version": version,
-		"cycle":   "F1",
+		"cycle":   "F2",
 		"store":   s.backend,
 		"ts":      time.Now().UTC().Format(time.RFC3339),
 		"roadmap": "see .project/vps/cycle-f-saas.md",

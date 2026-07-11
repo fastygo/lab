@@ -30,5 +30,5 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Status
 
-F0 done. F1 done: create/list/get run, report, events; sync/queue; demo + quality E2E on VPS;  
-bindings `themeZip`/`root`/`baseUrl`/`config`/`checkConfig`. Postgres via `DATABASE_URL`. Next: F2 org/sec jobs.
+F0–F2 done. Product presets runnable as API jobs on VPS (`org`, `quality`, `quality-wp`, `sec`, `static-web`).  
+`LAB_ALLOWED_BASE_URLS` guards owned targets. Isolation notes: [../vps/f2-isolation.md](../vps/f2-isolation.md). Next: F3 dashboard.

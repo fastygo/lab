@@ -4,7 +4,7 @@ Roadmap + checklists for turning local Lab CLI into a **job-based SaaS** that ru
 
 Host context: this lives next to the [VPS runbook](./README.md) because cloud workers will reuse the same Docker images and compose profiles on lab hosts.
 
-**Status:** 2026-07-11 — F0 done; F1 MVP (memory store + in-process worker + demo preset).
+**Status:** 2026-07-11 — F0–F2 done; next F3 dashboard.
 
 ---
 
@@ -161,22 +161,21 @@ Paths are snapshotted into the run manifest; adapters resolve relative to `LAB_R
 
 | # | Item | Status |
 |---|------|--------|
-| F2.1 | Preset `quality-wp` (live WP logged-out) | [ ] |
-| F2.2 | Preset `org` — compose org profile + zip + seed on worker | [ ] |
-| F2.3 | Preset `sec` — owned WP only; env for `LAB_WP_*` / tokens | [ ] |
-| F2.4 | Preset `static-web` (optional fourth) | [ ] |
-| F2.5 | Isolation: per-run network / cleanup policy documented | [ ] |
-| F2.6 | Golden “known fail” fixtures vs exit codes documented | [ ] |
+| F2.1 | Preset `quality-wp` (live WP logged-out) | [x] (VPS API) |
+| F2.2 | Preset `org` — compose org profile + zip + seed on worker | [x] (VPS API) |
+| F2.3 | Preset `sec` — owned WP only; env for `LAB_WP_*` / tokens | [x] (VPS API + `LAB_ALLOWED_BASE_URLS`) |
+| F2.4 | Preset `static-web` (optional fourth) | [x] (VPS API, pass) |
+| F2.5 | Isolation: per-run network / cleanup policy documented | [x] ([f2-isolation.md](./f2-isolation.md)) |
+| F2.6 | Golden “known fail” fixtures vs exit codes documented | [x] ([f2-isolation.md](./f2-isolation.md)) |
 
 **Exit:** All three product labs runnable as jobs with persisted reports matching CLI shape.
 
 **VPS checklist (F2)**
 
-- [ ] Org profile up; `LAB_WP_URL` public
-- [ ] Sec runners built (`wpscan`, `nuclei`, `phpcs-security`, `semgrep`, …)
-- [ ] Job timeout + disk budget per run
-- [ ] Deny arbitrary third-party URLs in sec adapter config
-
+- [x] Org profile up; `LAB_WP_URL` public
+- [x] Sec runners built (`wpscan`, `nuclei`, `phpcs-security`, `semgrep`, …)
+- [x] Job timeout + disk budget per run (documented; 60 min worker ctx)
+- [x] Deny arbitrary third-party URLs — `LAB_ALLOWED_BASE_URLS` in wordpress adapter
 ---
 
 ### F3 — Dashboard (process + reporting)
@@ -230,8 +229,8 @@ gates: S1✗ S2✓ S3✗ S4~
 2. runstore memory + apps/api + worker MVP ← done
 3. Postgres via DATABASE_URL / LAB_DATABASE_URL (pgx) ← done
 4. quality preset E2E on workers      ← done (VPS API)
-5. org + sec presets on VPS workers   ← next (F2)
-6. Dashboard F0 → timeline
+5. org + sec presets on VPS workers   ← done (F2)
+6. Dashboard F0 → timeline            ← next (F3)
 7. Schedules + Slack/Telegram
 ```
 
@@ -311,9 +310,9 @@ Without URL the API keeps the in-memory store.
 
 ## Definition of “Cycle F done”
 
-- [ ] F0 event layer merged and tested
-- [ ] F1 quality job via API on VPS
-- [ ] F2 org + sec jobs via API
+- [x] F0 event layer merged and tested
+- [x] F1 quality job via API on VPS
+- [x] F2 org + sec jobs via API
 - [ ] F3.0–F3.3 dashboard (list + report + timeline)
 - [ ] F4 Slack **or** Telegram + one schedule
 

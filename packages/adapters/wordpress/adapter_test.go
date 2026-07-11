@@ -39,6 +39,17 @@ func TestPrepareResolvesRelativeThemeZip(t *testing.T) {
 	}
 }
 
+func TestAllowedBaseURL(t *testing.T) {
+	a := wordpress.New(t.TempDir())
+	t.Setenv("LAB_ALLOWED_BASE_URLS", "http://127.0.0.1:8080,http://5.129.242.217:8080")
+	if err := a.Prepare(context.Background(), map[string]string{"baseUrl": "http://evil.example"}); err == nil {
+		t.Fatal("expected deny")
+	}
+	if err := a.Prepare(context.Background(), map[string]string{"baseUrl": "http://127.0.0.1:8080"}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestMatrixIncludesAttachmentWhenSeeded(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

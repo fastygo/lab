@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fastygo/lab/packages/domain"
 )
@@ -42,6 +43,9 @@ func (a *Adapter) Prepare(_ context.Context, config map[string]string) error {
 	a.baseURL = config["baseUrl"]
 	if a.baseURL == "" {
 		a.baseURL = "http://127.0.0.1:8080"
+	}
+	if err := checkAllowedBaseURL(a.baseURL); err != nil {
+		return err
 	}
 	zip := config["themeZip"]
 	if zip != "" {
@@ -131,6 +135,25 @@ func resolveThemeZip(zip, repoRoot string) (string, error) {
 		last = os.ErrNotExist
 	}
 	return "", last
+}
+
+// checkAllowedBaseURL enforces LAB_ALLOWED_BASE_URLS when set (Cycle F / sec owned targets).
+// Comma-separated URL prefixes, e.g. http://127.0.0.1:8080,http://5.129.242.217:8080
+func checkAllowedBaseURL(baseURL string) error {
+	raw := strings.TrimSpace(os.Getenv("LAB_ALLOWED_BASE_URLS"))
+	if raw == "" {
+		return nil
+	}
+	for _, p := range strings.Split(raw, ",") {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		if strings.HasPrefix(baseURL, p) {
+			return nil
+		}
+	}
+	return fmt.Errorf("baseUrl %q not allowed (set LAB_ALLOWED_BASE_URLS for owned lab targets)", baseURL)
 }
 
 func (a *Adapter) Serve(_ context.Context) (domain.Target, error) {
