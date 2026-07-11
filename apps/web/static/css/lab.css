@@ -1,0 +1,175 @@
+/* Lab dashboard layout helpers (extends ui8kit app.css) */
+.lab-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 480px at 12% -10%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, color-mix(in oklab, var(--secondary) 10%, transparent), transparent 55%),
+    var(--background);
+}
+.lab-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+.lab-frame {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding: 1.25rem 1.25rem 3rem;
+}
+@media (min-width: 768px) {
+  .lab-frame { padding: 1.5rem 1.75rem 3.5rem; }
+}
+.lab-brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--primary);
+  text-decoration: none;
+}
+.lab-brand span {
+  color: var(--foreground);
+}
+.lab-nav a {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+.lab-nav a:hover { color: var(--foreground); }
+.lab-nav a.is-active {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.lab-hero {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 0 0.5rem;
+}
+@media (min-width: 768px) {
+  .lab-hero {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}
+.lab-kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.lab-run-title {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.lab-meta-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-block: 1px solid var(--border);
+}
+@media (min-width: 768px) {
+  .lab-meta-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.lab-meta-item .label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.25rem;
+}
+.lab-meta-item .value {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.lab-split {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+@media (min-width: 1024px) {
+  .lab-split {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.35fr);
+    align-items: start;
+  }
+}
+.lab-panel {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.lab-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 55%, var(--card));
+}
+.lab-panel-head h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.lab-panel-body { padding: 0.75rem 1rem 1rem; }
+.lab-timeline-row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+}
+.lab-timeline-row:last-child { border-bottom: 0; }
+.lab-timeline-type {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--secondary);
+  word-break: break-all;
+}
+.lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 40%, var(--card));
+}
+.lab-actions a {
+  font-size: 0.875rem;
+}
+.lab-mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.lab-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.lab-filters a {
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  background: var(--card);
+}
+.lab-filters a:hover,
+.lab-filters a.is-active {
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  background: color-mix(in oklab, var(--primary) 8%, var(--card));
+}

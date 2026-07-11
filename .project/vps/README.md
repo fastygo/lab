@@ -244,7 +244,7 @@ curl -sS http://127.0.0.1:8092/healthz
 
 ## Quick checklist (print / paste)
 
-- [ ] Debian/Ubuntu VPS, ports 22/8080/(8091)
+- [ ] Debian/Ubuntu VPS, ports 22/8080/8090/8092 (8091 fixture)
 - [ ] Docker + `docker compose` + Make + Git + unzip
 - [ ] Go on `PATH`
 - [ ] Repo at `/opt/fastygo/lab` with `testdata/dist/latte.zip`
