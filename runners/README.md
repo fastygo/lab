@@ -8,21 +8,22 @@ A **runner** executes one tool (or a small tool family) and emits **findings** J
 |----|------|------|
 | `stub` | in-process | `packages/orchestrator/stub` |
 | `zip-lint` | in-process | `packages/orchestrator/ziplint` |
-| `headers` | in-process | `packages/orchestrator/headers` |
+| `headers` | in-process | S1 recon + S5 headers |
+| `auth-abuse` | in-process | S3 spray / xmlrpc multicall / cookies |
+| `theme-sec` | in-process | S4 zip danger patterns + search XSS |
+| `seo-meta` | in-process | `packages/orchestrator/seometa` |
 | `http-matrix` | in-process | `packages/orchestrator/httpmatrix` |
 | `lighthouse` | Docker | `runners/lighthouse` → `lab/lighthouse:local` |
 | `axe` | Docker | `runners/axe` → `lab/axe:local` |
 | `theme-check` | Docker | `runners/theme-check` → `lab/theme-check:local` |
 | `vnu` | Docker | `runners/vnu` → `lab/vnu:local` |
-| `wpscan` | Docker | `runners/wpscan` / `wpscanteam/wpscan` |
-| `headers` | In-process | S1 recon + S5 headers |
-| `auth-abuse` | In-process | S3 spray / xmlrpc multicall / cookies |
-| `theme-sec` | In-process | S4 zip danger patterns + search XSS |
+| `wpscan` | Docker | `runners/wpscan` → `lab/wpscan:local` |
+| `composer-audit` | Docker | `runners/composer-audit` → `lab/composer-audit:local` |
+| `nuclei` | Docker | `runners/nuclei` → `lab/nuclei:local` |
 | `notice-hunter` | Docker | `runners/notice-hunter` → `lab/notice-hunter:local` |
 | `org-keyboard` | Docker | `runners/org-keyboard` → `lab/org-keyboard:local` |
 | `css-lint` | Docker | `runners/css-lint` → `lab/css-lint:local` |
 | `quality-extras` | Docker | `runners/quality-extras` → `lab/quality-extras:local` |
-| `seo-meta` | in-process | `packages/orchestrator/seometa` |
 
 Build: `make runners`
 

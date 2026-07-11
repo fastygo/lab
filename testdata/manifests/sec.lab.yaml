@@ -17,12 +17,19 @@ spec:
       checks:
         - id: http-recon
           runner: headers
-    - id: S2-wpscan
+    - id: S2-cve
       checks:
         - id: wpscan-enum
           runner: wpscan
           config:
             dockerNetwork: host
+        - id: composer-audit
+          runner: composer-audit
+        - id: nuclei-wp
+          runner: nuclei
+          config:
+            dockerNetwork: host
+            # Optional: env.LAB_NUCLEI_TAGS: wordpress,cve
     - id: S3-auth
       checks:
         - id: auth-abuse

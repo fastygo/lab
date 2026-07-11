@@ -115,6 +115,17 @@ func packRules(pack string) []Rule {
 			{Code: "sec.wpscan.users", Basket: domain.BasketSiteDefaultOff, Rationale: "Hide/limit user enumeration"},
 			{Code: "sec.wpscan.vuln", Basket: domain.BasketFixSite, Rationale: "Patch core/plugin/theme CVE"},
 			{Code: "sec.wpscan.exec_failed", Basket: domain.BasketFixSite, Rationale: "WPScan execution failed"},
+			{Code: "sec.composer.ok", Basket: domain.BasketAccept, Rationale: "No Composer advisories"},
+			{Code: "sec.composer.completed", Basket: domain.BasketAccept, Rationale: "Composer audit finished"},
+			{Code: "sec.composer.advisory", Basket: domain.BasketFixTheme, Rationale: "Upgrade/replace vulnerable Composer package"},
+			{Code: "sec.composer.abandoned", Basket: domain.BasketBudget, Rationale: "Review abandoned packages"},
+			{Code: "sec.composer.lock_missing", Basket: domain.BasketAccept, Rationale: "No lockfile to audit"},
+			{Code: "sec.composer.zip_missing", Basket: domain.BasketBudget, Rationale: "themeZip required for composer audit"},
+			{Code: "sec.composer.exec_failed", Basket: domain.BasketFixTheme, Rationale: "composer audit failed"},
+			{Code: "sec.nuclei.ok", Basket: domain.BasketAccept, Rationale: "No Nuclei wordpress matches"},
+			{Code: "sec.nuclei.completed", Basket: domain.BasketAccept, Rationale: "Nuclei scan finished"},
+			{Code: "sec.nuclei.match", Basket: domain.BasketFixSite, Rationale: "Address Nuclei WordPress/CVE match"},
+			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "Docker runner image not available"},
 			{Code: "sec.auth.ok", Basket: domain.BasketAccept, Rationale: "Auth abuse probes passed"},
 			{Code: "sec.auth.rate_limit_present", Basket: domain.BasketAccept, Rationale: "Login rate limit observed"},
 			{Code: "sec.auth.login_no_rate_limit", Basket: domain.BasketSiteDefaultOn, Rationale: "Enable login rate limit on site baseline"},
@@ -147,7 +158,6 @@ func packRules(pack string) []Rule {
 			{Code: "sec.theme.xss_reflected", Basket: domain.BasketFixTheme, Rationale: "Escape search/reflected output"},
 			{Code: "sec.theme.path_disclosure", Basket: domain.BasketSiteDefaultOff, Rationale: "WP_DEBUG_DISPLAY off on prod"},
 			{Code: "sec.theme.zip_open_failed", Basket: domain.BasketFixTheme, Rationale: "themeZip unreadable"},
-			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "WPScan needs Docker"},
 		}...)
 	case "default":
 		return defaultRules()

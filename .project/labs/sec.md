@@ -13,7 +13,7 @@ Attack **owned lab targets** to decide what to cut from artifacts vs enable/disa
 | Gate | Focus |
 |------|-------|
 | S1 Recon | Version leak, user enum, xmlrpc, REST, sensitive files, directory listing |
-| S2 CVE | WPScan (+ API token) vulnerability map; Nuclei / composer audit deferred |
+| S2 CVE | WPScan (+ API token), `composer audit` on theme zip, Nuclei wordpress tags |
 | S3 Auth abuse | Limited spray, xmlrpc multicall, cookie flags (`LAB_WP_PASSWORD`), host-header reset |
 | S4 Target SAST/dynamic | Theme zip danger patterns + reflected search XSS probe |
 | S5 Headers/config | Security headers, `DISALLOW_FILE_EDIT` endpoint note (via `headers` runner) |
@@ -32,11 +32,11 @@ Attack **owned lab targets** to decide what to cut from artifacts vs enable/disa
 ## Status (Cycle D)
 
 - **headers** — S1 recon + S5 header scorecard
-- **auth-abuse** — S3 spray / xmlrpc multicall / cookies / host-header
-- **theme-sec** — S4 static zip + search XSS
-- **wpscan** — S2 enum (+ vulns with API token)
+- **wpscan** / **composer-audit** / **nuclei** — S2
+- **auth-abuse** — S3
+- **theme-sec** — S4
 - Manifest: `testdata/manifests/sec.lab.yaml`
 - Policy pack: `secure-baseline`
 
-Open: Nuclei, `composer audit`, Semgrep/PHPCS-security, deeper XSS fixtures.
+Open: Semgrep/PHPCS-security, deeper XSS fixtures, SameSite raw cookie assert.
 

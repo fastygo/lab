@@ -190,9 +190,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| WPScan API token CVE match | [~] | maps `vulnerabilities` when token set (`WPSCAN_API_TOKEN`) |
-| Nuclei WP templates | [ ] | deferred |
-| `composer audit` on theme | [ ] | |
+| WPScan API token CVE match | [x] | `vp,vt` when `WPSCAN_API_TOKEN` set; maps `sec.wpscan.vuln` |
+| Nuclei WP templates | [x] | runner `nuclei` → `sec.nuclei.match` / `.ok` |
+| `composer audit` on theme | [x] | runner `composer-audit` on theme zip lockfile |
 
 ### S3 — Auth abuse
 
@@ -226,7 +226,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Check | Status | Notes |
 |-------|--------|-------|
 | Policy pack `secure-baseline` | [x] | |
-| Manifest `sec.lab.yaml` | [x] | S1 headers + S2 wpscan + S3 auth-abuse + S4 theme-sec |
+| Manifest `sec.lab.yaml` | [x] | S1–S5: headers, S2 wpscan+composer+nuclei, S3 auth, S4 theme-sec |
 | Compose profile `sec` | [x] | shares wordpress service |
 | Decision baskets documented | [x] | `.project/policy.md` |
 
@@ -250,9 +250,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. **Sec S2** — `composer audit` on theme + optional Nuclei  
-2. Cookie SameSite assert (raw Set-Cookie) + privilege/CSRF if theme grows endpoints  
-3. Cycle E — static-web adapters  
+1. Cycle E — static-web adapters  
+2. SameSite cookie assert (raw Set-Cookie) + Semgrep/PHPCS-security  
+3. Deeper XSS fixtures (title/content) beyond search probe  
 
 ---
 
@@ -263,5 +263,5 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Org Gate 1 | 26 | 0 | 0 |
 | Org Gate 2–4 | 18 | 0 | 0 |
 | Quality Q1–Q6 | 28 | 0 | 0 |
-| Sec S1–S5 | 22 | 2 | ~4 |
+| Sec S1–S5 | 25 | 1 | ~2 |
 | Framework | 8 | 0 | 2 |

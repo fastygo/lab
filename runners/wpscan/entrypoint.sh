@@ -9,8 +9,14 @@ if [ -n "${WPSCAN_API_TOKEN:-}" ]; then
   TOKEN_ARGS="--api-token ${WPSCAN_API_TOKEN}"
 fi
 
+# Prefer vulnerable enums when API token is present (S2).
+ENUM="u,t,p"
+if [ -n "${WPSCAN_API_TOKEN:-}" ]; then
+  ENUM="u,t,p,vp,vt"
+fi
+
 # shellcheck disable=SC2086
-RAW="$(wpscan --url "$TARGET" --enumerate u,t,p --format json $TOKEN_ARGS 2>/dev/null || true)"
+RAW="$(wpscan --url "$TARGET" --enumerate "$ENUM" --format json $TOKEN_ARGS 2>/dev/null || true)"
 if [ -z "$RAW" ]; then
   printf '%s\n' "{\"findings\":[{\"code\":\"sec.wpscan.exec_failed\",\"gate\":\"$GATE\",\"check\":\"$CHECK\",\"severity\":\"high\",\"message\":\"wpscan produced no JSON\",\"target\":\"$TARGET\"}]}"
   exit 0

@@ -138,7 +138,7 @@ make runners
 docker images | grep '^lab/'
 ```
 
-Expected images include: `lab/lighthouse`, `lab/axe`, `lab/theme-check`, `lab/vnu`, `lab/notice-hunter`, `lab/org-keyboard`, `lab/css-lint`, `lab/quality-extras`, `lab/wpscan` (or upstream wpscan tag).
+Expected images include: `lab/lighthouse`, `lab/axe`, `lab/theme-check`, `lab/vnu`, `lab/notice-hunter`, `lab/org-keyboard`, `lab/css-lint`, `lab/quality-extras`, `lab/wpscan`, `lab/composer-audit`, `lab/nuclei`.
 
 ---
 

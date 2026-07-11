@@ -36,6 +36,8 @@ func DefaultRunners() []orchestrator.Runner {
 	tcImage := envOr("LAB_THEMECHECK_IMAGE", "lab/theme-check:local")
 	vnuImage := envOr("LAB_VNU_IMAGE", "lab/vnu:local")
 	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "lab/wpscan:local")
+	composerAuditImage := envOr("LAB_COMPOSER_AUDIT_IMAGE", "lab/composer-audit:local")
+	nucleiImage := envOr("LAB_NUCLEI_IMAGE", "lab/nuclei:local")
 	noticeImage := envOr("LAB_NOTICE_HUNTER_IMAGE", "lab/notice-hunter:local")
 	keyboardImage := envOr("LAB_ORG_KEYBOARD_IMAGE", "lab/org-keyboard:local")
 	cssImage := envOr("LAB_CSS_LINT_IMAGE", "lab/css-lint:local")
@@ -54,6 +56,8 @@ func DefaultRunners() []orchestrator.Runner {
 		docker.New("theme-check", tcImage),
 		docker.New("vnu", vnuImage),
 		docker.New("wpscan", wpscanImage),
+		docker.New("composer-audit", composerAuditImage),
+		docker.New("nuclei", nucleiImage),
 		docker.New("notice-hunter", noticeImage),
 		docker.New("org-keyboard", keyboardImage),
 		docker.New("css-lint", cssImage),

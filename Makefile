@@ -30,6 +30,8 @@ runners:
 	docker build -t lab/theme-check:local runners/theme-check
 	docker build -t lab/vnu:local runners/vnu
 	docker build -t lab/wpscan:local runners/wpscan
+	docker build -t lab/composer-audit:local runners/composer-audit
+	docker build -t lab/nuclei:local runners/nuclei
 	docker build -t lab/notice-hunter:local runners/notice-hunter
 	docker build -t lab/org-keyboard:local runners/org-keyboard
 	docker build -t lab/css-lint:local runners/css-lint
