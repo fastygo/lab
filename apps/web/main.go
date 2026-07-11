@@ -52,6 +52,7 @@ func main() {
 		if err != nil {
 			props.Err = err.Error()
 		} else {
+			props.Live = views.IsLiveStatus(run.Status)
 			if report, rerr := api.getReport(r.Context(), id); rerr == nil {
 				props.Report = report
 				if run.Summary == nil {
@@ -65,6 +66,17 @@ func main() {
 		}
 		if err := views.RunDetailPage(props).Render(r.Context(), w); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+	mux.HandleFunc("GET /runs/{id}/live", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		q := r.URL.RawQuery
+		path := "/v1/runs/" + url.PathEscape(id) + "/events/stream"
+		if q != "" {
+			path += "?" + q
+		}
+		if err := api.proxySSE(r.Context(), w, path); err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
 		}
 	})
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
@@ -140,6 +152,47 @@ func (a *apiClient) getJSON(ctx context.Context, path string, dest any) error {
 		return fmt.Errorf("api %s: %s", path, resp.Status)
 	}
 	return json.NewDecoder(resp.Body).Decode(dest)
+}
+
+// proxySSE forwards an API SSE stream to the browser (same-origin EventSource).
+func (a *apiClient) proxySSE(ctx context.Context, w http.ResponseWriter, path string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.base+path, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "text/event-stream")
+	client := &http.Client{Timeout: 0} // long-lived stream
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("api stream: %s", resp.Status)
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		return fmt.Errorf("streaming unsupported")
+	}
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.WriteHeader(http.StatusOK)
+	flusher.Flush()
+	buf := make([]byte, 4096)
+	for {
+		n, err := resp.Body.Read(buf)
+		if n > 0 {
+			if _, werr := w.Write(buf[:n]); werr != nil {
+				return nil
+			}
+			flusher.Flush()
+		}
+		if err != nil {
+			return nil
+		}
+	}
 }
 
 func envOr(k, def string) string {

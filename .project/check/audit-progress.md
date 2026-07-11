@@ -246,13 +246,13 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | WordPress adapter stub | [x] | baseUrl + themeZip + matrix |
 | `static-web` adapter (Cycle E) | [x] | dist SPA serve + optional vite preview |
 | wpfasty `theme:verify` / `theme:audit` client | [~] | `theme:audit` → Lab org `-o dist/*.audit.json`; full verify later |
-| SaaS API / workers | [~] | Cycle F — F3 dashboard (`make web`); next SSE/F4; [cycle-f-saas.md](../vps/cycle-f-saas.md) |
+| SaaS API / workers | [~] | Cycle F — F3 SSE + F4 notify; schedules open; [cycle-f-saas.md](../vps/cycle-f-saas.md) |
 
 ---
 
 ## Suggested next (priority)
 
-1. Cycle F — **F3.4** SSE + **F4** Slack/Telegram schedules  
+1. Cycle F — **F4.1–F4.2** schedules (cron → enqueue)  
 2. Optional: deeper XSS Unit Test fixtures  
 
 ---

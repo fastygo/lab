@@ -242,19 +242,22 @@ templ RunDetailPage(p RunDetailProps) {
 				}
 				@card.Card(card.CardProps{Variant: "default"}) {
 					@card.CardHeader(card.CardHeaderProps{}) {
-						@card.CardTitle(card.CardTitleProps{}) {
-							Timeline
+						@group.Group(group.GroupProps{Class: "items-center gap-3"}) {
+							@card.CardTitle(card.CardTitleProps{}) {
+								Timeline
+							}
+							if p.Live {
+								<span id="live-badge" class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs uppercase tracking-wide text-muted-foreground">live</span>
+							}
 						}
 					}
 					@card.CardContent(card.CardContentProps{}) {
-						if len(p.Events) == 0 {
-							@text.Text(text.TextProps{Class: "text-sm text-muted-foreground"}) {
-								No events yet.
-							}
-						} else {
-							@stack.Stack(stack.StackProps{Class: "gap-3"}) {
+						<div id="timeline" class="flex flex-col gap-3">
+							if len(p.Events) == 0 {
+								<p id="timeline-empty" class="text-sm text-muted-foreground">No events yet — waiting for worker…</p>
+							} else {
 								for _, ev := range p.Events {
-									@group.Group(group.GroupProps{Class: "items-start gap-3"}) {
+									@group.Group(group.GroupProps{Class: "items-start gap-3 timeline-row"}) {
 										@badge.Badge(badge.BadgeProps{Variant: "outline", Size: "sm", Class: "shrink-0 font-mono"}) {
 											{ string(ev.Type) }
 										}
@@ -269,8 +272,66 @@ templ RunDetailPage(p RunDetailProps) {
 									}
 								}
 							}
-						}
+						</div>
 					}
+				}
+				if p.Live {
+					<script>
+						(function () {
+							const id = { templ.JSStr(p.Run.ID) };
+							let n = { len(p.Events) };
+							const root = document.getElementById("timeline");
+							const badge = document.getElementById("live-badge");
+							const es = new EventSource("/runs/" + id + "/live?after=" + n);
+							function label(ev) {
+								if (ev.check) return (ev.gate || "") + " · " + ev.check;
+								if (ev.gate) return ev.gate;
+								if (ev.adapter) return (ev.adapter + " " + (ev.baseUrl || "")).trim();
+								if (ev.error) return ev.error;
+								return ev.lab || "";
+							}
+							function append(ev) {
+								const empty = document.getElementById("timeline-empty");
+								if (empty) empty.remove();
+								const row = document.createElement("div");
+								row.className = "flex items-start gap-3 timeline-row";
+								const type = document.createElement("div");
+								type.className = "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-mono shrink-0";
+								type.textContent = ev.type || "";
+								const col = document.createElement("div");
+								col.className = "flex flex-col gap-0.5 min-w-0";
+								const msg = document.createElement("div");
+								msg.className = "text-sm";
+								msg.textContent = label(ev);
+								const ts = document.createElement("div");
+								ts.className = "text-xs text-muted-foreground";
+								ts.textContent = ev.ts || "";
+								col.appendChild(msg);
+								col.appendChild(ts);
+								row.appendChild(type);
+								row.appendChild(col);
+								root.appendChild(row);
+								n++;
+							}
+							es.addEventListener("event", function (e) {
+								try { append(JSON.parse(e.data)); } catch (_) {}
+							});
+							es.addEventListener("status", function (e) {
+								try {
+									const st = JSON.parse(e.data);
+									if (badge) badge.textContent = st.status || "live";
+								} catch (_) {}
+							});
+							es.addEventListener("done", function () {
+								if (badge) badge.textContent = "done";
+								es.close();
+								setTimeout(function () { location.reload(); }, 800);
+							});
+							es.onerror = function () {
+								if (badge) badge.textContent = "reconnect…";
+							};
+						})();
+					</script>
 				}
 				@card.Card(card.CardProps{Variant: "default"}) {
 					@card.CardHeader(card.CardHeaderProps{}) {

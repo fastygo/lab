@@ -30,5 +30,5 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Status
 
-F0–F3.3 done. Dashboard: `apps/web` (Templ + vendored ui8kit) → `LAB_API_URL`.  
-`make api` + `make web` → http://127.0.0.1:8091/
+F0–F3 done (+ F4 notify). Dashboard: `make web` with live SSE on running jobs.  
+Notify: `SLACK_WEBHOOK_URL` / Telegram env; `POST /v1/notify/test`. Schedules still open.

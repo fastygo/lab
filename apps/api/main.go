@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fastygo/lab/packages/notify"
 	"github.com/fastygo/lab/packages/presets"
 	"github.com/fastygo/lab/packages/registry"
 	"github.com/fastygo/lab/packages/runstore"
@@ -20,11 +21,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Cycle F API — runs + in-process worker.
-// Store: memory by default; Postgres when LAB_DATABASE_URL or DATABASE_URL is set
-// (postgres://… connection URI — same idea as Supabase).
+// Cycle F API — runs + in-process worker + SSE + notify.
 // Spec: .project/vps/cycle-f-saas.md
-const version = "0.1.0-f2"
+const version = "0.1.0-f3"
 
 type server struct {
 	store    runstore.Store
@@ -32,6 +31,7 @@ type server struct {
 	repoRoot string
 	queue    chan string
 	wg       sync.WaitGroup
+	notify   notify.Config
 }
 
 type createRunRequest struct {
@@ -62,6 +62,7 @@ func main() {
 		backend:  backend,
 		repoRoot: root,
 		queue:    make(chan string, 64),
+		notify:   notify.FromEnv(),
 	}
 	workers := 1
 	if n, err := strconv.Atoi(os.Getenv("LAB_API_WORKERS")); err == nil && n > 0 {
@@ -81,8 +82,10 @@ func main() {
 	mux.HandleFunc("GET /v1/runs/{id}", s.handleGetRun)
 	mux.HandleFunc("GET /v1/runs/{id}/report", s.handleGetReport)
 	mux.HandleFunc("GET /v1/runs/{id}/events", s.handleGetEvents)
+	mux.HandleFunc("GET /v1/runs/{id}/events/stream", s.handleEventsStream)
+	mux.HandleFunc("POST /v1/notify/test", s.handleNotifyTest)
 
-	fmt.Fprintf(os.Stderr, "lab-api %s listening on %s (repo=%s workers=%d store=%s)\n", version, addr, root, workers, backend)
+	fmt.Fprintf(os.Stderr, "lab-api %s listening on %s (repo=%s workers=%d store=%s notify=%v)\n", version, addr, root, workers, backend, s.notify.Enabled())
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -114,7 +117,41 @@ func (s *server) loop() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "worker run %s: %v\n", id, err)
 		}
+		s.afterRun(id)
 	}
+}
+
+func (s *server) afterRun(id string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	run, err := s.store.GetRun(ctx, id)
+	if err != nil {
+		return
+	}
+	if err := notify.NotifyRunFinished(ctx, s.notify, run); err != nil {
+		fmt.Fprintf(os.Stderr, "notify run %s: %v\n", id, err)
+	}
+}
+
+func (s *server) handleNotifyTest(w http.ResponseWriter, r *http.Request) {
+	if !s.notify.Enabled() {
+		writeErr(w, http.StatusServiceUnavailable, "notify not configured (SLACK_WEBHOOK_URL and/or TELEGRAM_BOT_TOKEN+TELEGRAM_CHAT_ID)")
+		return
+	}
+	demo := &runstore.Run{
+		ID:     "notify-test",
+		Lab:    "demo",
+		Status: runstore.StatusFail,
+		Report: nil,
+	}
+	// Force send regardless of filter for test endpoint.
+	cfg := s.notify
+	cfg.Filter = notify.FilterAlways
+	if err := notify.NotifyRunFinished(r.Context(), cfg, demo); err != nil {
+		writeErr(w, http.StatusBadGateway, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "message": notify.Message(demo, cfg.DashboardBase)})
 }
 
 func (s *server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
@@ -122,8 +159,9 @@ func (s *server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 		"ok":      true,
 		"service": "lab-api",
 		"version": version,
-		"cycle":   "F2",
+		"cycle":   "F3",
 		"store":   s.backend,
+		"notify":  s.notify.Enabled(),
 		"ts":      time.Now().UTC().Format(time.RFC3339),
 		"roadmap": "see .project/vps/cycle-f-saas.md",
 	})
@@ -188,6 +226,7 @@ func (s *server) handleCreateRun(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Minute)
 		defer cancel()
 		_ = worker.Execute(ctx, worker.Options{Store: s.store, RepoRoot: s.repoRoot}, run.ID)
+		s.afterRun(run.ID)
 		updated, err := s.store.GetRun(r.Context(), run.ID)
 		if err != nil {
 			writeErr(w, http.StatusInternalServerError, err.Error())

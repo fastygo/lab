@@ -31,12 +31,17 @@ type RunsPageProps struct {
 }
 
 type RunDetailProps struct {
-	APIBase  string
-	Run      RunRow
-	Report   *domain.Report
-	Events   []domain.RunEvent
-	Err      string
-	Baskets  []BasketCount
+	APIBase string
+	Run     RunRow
+	Report  *domain.Report
+	Events  []domain.RunEvent
+	Err     string
+	Baskets []BasketCount
+	Live    bool // enable SSE timeline while queued/running
+}
+
+func IsLiveStatus(status string) bool {
+	return status == "queued" || status == "running"
 }
 
 type BasketCount struct {
