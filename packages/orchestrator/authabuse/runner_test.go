@@ -152,3 +152,52 @@ func TestAuthAbuseHostPoison(t *testing.T) {
 	}
 	t.Fatalf("expected host_header_poison, got %+v", got)
 }
+
+func TestAuthAbuseSameSite(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/wp-login.php" && r.Method == http.MethodGet:
+			w.Header().Add("Set-Cookie", "wordpress_test_cookie=1; path=/; HttpOnly; SameSite=Lax")
+			w.WriteHeader(200)
+		case r.URL.Path == "/wp-login.php" && r.Method == http.MethodPost && r.URL.Query().Get("action") == "lostpassword":
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte("ok"))
+		case r.URL.Path == "/wp-login.php" && r.Method == http.MethodPost:
+			_ = r.ParseForm()
+			if r.Form.Get("pwd") == "lab-pass" {
+				w.Header().Add("Set-Cookie", "wordpress_logged_in_abc=session; path=/; HttpOnly")
+				w.Header().Set("Location", "/wp-admin/")
+				w.WriteHeader(302)
+				return
+			}
+			w.WriteHeader(200)
+			_, _ = w.Write([]byte(`<div id="login_error">Error: incorrect password</div>`))
+		case r.URL.Path == "/xmlrpc.php":
+			w.WriteHeader(405)
+		default:
+			w.WriteHeader(200)
+		}
+	}))
+	t.Cleanup(srv.Close)
+
+	r := authabuse.New()
+	got, err := r.Run(context.Background(), ports.RunnerRequest{
+		Gate:   "S3",
+		Check:  domain.Check{ID: "auth", Runner: "auth-abuse", Config: map[string]string{"password": "lab-pass"}},
+		Target: domain.Target{BaseURL: srv.URL},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	codes := map[string]bool{}
+	for _, f := range got {
+		codes[f.Code] = true
+	}
+	if !codes["sec.auth.cookie_no_samesite"] {
+		t.Fatalf("expected cookie_no_samesite for logged_in cookie, got %+v", got)
+	}
+	if codes["sec.auth.weak_password"] {
+		t.Fatalf("spray must not succeed: %+v", got)
+	}
+}

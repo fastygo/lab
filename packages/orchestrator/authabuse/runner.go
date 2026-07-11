@@ -160,21 +160,20 @@ func (r *Runner) cookieFlags(ctx context.Context, req ports.RunnerRequest, base,
 	client := &http.Client{
 		Timeout: 12 * time.Second,
 		Jar:     jar,
+		// Do not follow redirects — Set-Cookie is on the 302 login response.
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= 5 {
-				return http.ErrUseLastResponse
-			}
-			return nil
+			return http.ErrUseLastResponse
 		},
 	}
 	loginURL := base + "/wp-login.php"
 	var findings []domain.Finding
 
-	// Always inspect test cookie from login page.
+	// Always inspect test cookie from login page (raw Set-Cookie for SameSite).
 	resp, err := client.Get(loginURL)
 	if err == nil {
+		findings = append(findings, inspectSetCookieHeaders(req, resp.Header, loginURL, "wordpress_test_cookie", false)...)
+		_, _ = io.Copy(io.Discard, resp.Body)
 		_ = resp.Body.Close()
-		findings = append(findings, inspectCookies(req, jar, loginURL, "wordpress_test_cookie", false)...)
 	}
 
 	if labPass == "" {
@@ -198,6 +197,7 @@ func (r *Runner) cookieFlags(ctx context.Context, req ports.RunnerRequest, base,
 	if err != nil {
 		return findings
 	}
+	rawHdr := resp.Header.Clone()
 	_, _ = io.Copy(io.Discard, resp.Body)
 	_ = resp.Body.Close()
 
@@ -210,42 +210,82 @@ func (r *Runner) cookieFlags(ctx context.Context, req ports.RunnerRequest, base,
 			}
 		}
 	}
+	// Also detect from raw Set-Cookie if jar missed (redirect edge cases)
+	for _, line := range rawHdr.Values("Set-Cookie") {
+		if strings.HasPrefix(strings.ToLower(line), "wordpress_logged_in_") {
+			loggedIn = true
+		}
+	}
 	if !loggedIn {
 		findings = append(findings, f(req, "sec.auth.login_failed", domain.SeverityMedium,
 			"lab credentials did not produce wordpress_logged_in cookie", loginURL))
 		return findings
 	}
-	findings = append(findings, inspectCookies(req, jar, base, "wordpress_logged_in_", true)...)
-	findings = append(findings, inspectCookies(req, jar, base, "wordpress_sec_", true)...)
+	findings = append(findings, inspectSetCookieHeaders(req, rawHdr, base, "wordpress_logged_in_", true)...)
+	findings = append(findings, inspectSetCookieHeaders(req, rawHdr, base, "wordpress_sec_", true)...)
 	return findings
 }
 
-func inspectCookies(req ports.RunnerRequest, jar http.CookieJar, rawURL, namePrefix string, requireSecureHint bool) []domain.Finding {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return nil
+// inspectSetCookieHeaders parses raw Set-Cookie (preserves SameSite; cookiejar may drop it).
+func inspectSetCookieHeaders(req ports.RunnerRequest, hdr http.Header, rawURL, namePrefix string, authCookie bool) []domain.Finding {
+	scheme := "http"
+	if u, err := url.Parse(rawURL); err == nil && u.Scheme != "" {
+		scheme = u.Scheme
 	}
 	var findings []domain.Finding
-	for _, c := range jar.Cookies(u) {
-		if c.Name != namePrefix && !strings.HasPrefix(c.Name, namePrefix) {
+	seenSecureHTTP := false
+	for _, line := range hdr.Values("Set-Cookie") {
+		name := cookieName(line)
+		if name == "" {
 			continue
 		}
-		if !c.HttpOnly {
+		if name != namePrefix && !strings.HasPrefix(name, namePrefix) {
+			continue
+		}
+		low := strings.ToLower(line)
+		if !strings.Contains(low, "httponly") {
 			findings = append(findings, f(req, "sec.auth.cookie_no_httponly", domain.SeverityMedium,
-				"cookie "+c.Name+" missing HttpOnly", rawURL))
+				"cookie "+name+" missing HttpOnly", rawURL))
 		}
-		// SameSite is not exposed on net/http.Cookie after jar parse in older Go —
-		// check via raw Set-Cookie is better; jar loses SameSite in some versions.
-		if requireSecureHint && u.Scheme == "https" && !c.Secure {
+		if ss, ok := cookieAttr(low, "samesite"); !ok || ss == "" {
+			findings = append(findings, f(req, "sec.auth.cookie_no_samesite", domain.SeverityMedium,
+				"cookie "+name+" missing SameSite", rawURL))
+		} else if ss == "none" && !strings.Contains(low, "secure") {
+			findings = append(findings, f(req, "sec.auth.cookie_samesite_none_insecure", domain.SeverityHigh,
+				"cookie "+name+" has SameSite=None without Secure", rawURL))
+		}
+		if authCookie && scheme == "https" && !strings.Contains(low, "secure") {
 			findings = append(findings, f(req, "sec.auth.cookie_no_secure", domain.SeverityMedium,
-				"cookie "+c.Name+" missing Secure on HTTPS", rawURL))
+				"cookie "+name+" missing Secure on HTTPS", rawURL))
 		}
-		if requireSecureHint && u.Scheme == "http" {
+		if authCookie && scheme == "http" && !seenSecureHTTP {
+			seenSecureHTTP = true
 			findings = append(findings, f(req, "sec.auth.cookie_secure_http", domain.SeverityInfo,
 				"auth cookies on plain HTTP — Secure flag not applicable until HTTPS", rawURL))
 		}
 	}
 	return findings
+}
+
+func cookieName(setCookie string) string {
+	part := strings.SplitN(setCookie, ";", 2)[0]
+	kv := strings.SplitN(part, "=", 2)
+	return strings.TrimSpace(kv[0])
+}
+
+func cookieAttr(lowLine, attr string) (string, bool) {
+	// lowLine is already lowercased Set-Cookie
+	parts := strings.Split(lowLine, ";")
+	for _, p := range parts[1:] {
+		p = strings.TrimSpace(p)
+		if p == attr {
+			return "", true
+		}
+		if strings.HasPrefix(p, attr+"=") {
+			return strings.TrimSpace(strings.TrimPrefix(p, attr+"=")), true
+		}
+	}
+	return "", false
 }
 
 func (r *Runner) hostHeaderReset(ctx context.Context, req ports.RunnerRequest, base string) []domain.Finding {

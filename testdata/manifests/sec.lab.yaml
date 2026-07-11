@@ -39,3 +39,7 @@ spec:
       checks:
         - id: theme-sec
           runner: theme-sec
+        - id: phpcs-security
+          runner: phpcs-security
+        - id: semgrep-theme
+          runner: semgrep

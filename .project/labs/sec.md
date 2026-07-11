@@ -38,5 +38,5 @@ Attack **owned lab targets** to decide what to cut from artifacts vs enable/disa
 - Manifest: `testdata/manifests/sec.lab.yaml`
 - Policy pack: `secure-baseline`
 
-Open: Semgrep/PHPCS-security, deeper XSS fixtures, SameSite raw cookie assert.
+Open: optional deeper XSS Unit Test fixtures; Cycle F SaaS.
 

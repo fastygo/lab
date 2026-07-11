@@ -201,16 +201,16 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | Limited password spray | [x] | `sec.auth.login_no_rate_limit` / `.rate_limit_present` (fake wordlist only) |
 | XML-RPC multicall flood detect | [x] | `sec.auth.xmlrpc_multicall` |
-| Cookie flags after login | [x] | needs `LAB_WP_PASSWORD`; else `sec.auth.cookie_login_skipped` |
+| Cookie flags after login | [x] | HttpOnly / Secure / **SameSite** via raw `Set-Cookie`; needs `LAB_WP_PASSWORD` |
 | Host-header reset poison | [x] | `sec.auth.host_header_poison` / `.ok` |
 
 ### S4 — Theme attack surface
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Static dangerous PHP patterns (eval, unserialize, …) | [x] | runner `theme-sec` → `sec.theme.*` |
-| Semgrep / phpcs-security | [ ] | optional later |
-| Dynamic XSS fixtures | [~] | reflected search `/?s=<script>` probe |
+| Static dangerous PHP patterns (eval, unserialize, …) | [x] | runner `theme-sec` → `sec.theme.*` (+ `|noescape` on `.latte`) |
+| Semgrep / phpcs-security | [x] | runners `semgrep` + `phpcs-security` |
+| Dynamic XSS fixtures | [x] | search script + attribute breakout probes |
 
 ### S5 — Headers / config
 
@@ -252,9 +252,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. SameSite cookie assert (raw Set-Cookie) + Semgrep/PHPCS-security  
-2. Deeper XSS fixtures (title/content) beyond search probe  
-3. Cycle F — SaaS API / workers  
+1. Cycle F — SaaS API / workers  
+2. Optional: deeper XSS fixtures (title/content Unit Test payloads)  
 
 ---
 
@@ -265,5 +264,5 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Org Gate 1 | 26 | 0 | 0 |
 | Org Gate 2–4 | 18 | 0 | 0 |
 | Quality Q1–Q6 | 28 | 0 | 0 |
-| Sec S1–S5 | 25 | 1 | ~2 |
+| Sec S1–S5 | 28 | 0 | 0 |
 | Framework | 9 | 0 | 1 |

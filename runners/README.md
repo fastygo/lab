@@ -20,6 +20,8 @@ A **runner** executes one tool (or a small tool family) and emits **findings** J
 | `wpscan` | Docker | `runners/wpscan` → `lab/wpscan:local` |
 | `composer-audit` | Docker | `runners/composer-audit` → `lab/composer-audit:local` |
 | `nuclei` | Docker | `runners/nuclei` → `lab/nuclei:local` |
+| `phpcs-security` | Docker | `runners/phpcs-security` → `lab/phpcs-security:local` |
+| `semgrep` | Docker | `runners/semgrep` → `lab/semgrep:local` |
 | `notice-hunter` | Docker | `runners/notice-hunter` → `lab/notice-hunter:local` |
 | `org-keyboard` | Docker | `runners/org-keyboard` → `lab/org-keyboard:local` |
 | `css-lint` | Docker | `runners/css-lint` → `lab/css-lint:local` |

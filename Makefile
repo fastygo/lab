@@ -35,6 +35,8 @@ runners:
 	docker build -t lab/wpscan:local runners/wpscan
 	docker build -t lab/composer-audit:local runners/composer-audit
 	docker build -t lab/nuclei:local runners/nuclei
+	docker build -t lab/phpcs-security:local runners/phpcs-security
+	docker build -t lab/semgrep:local runners/semgrep
 	docker build -t lab/notice-hunter:local runners/notice-hunter
 	docker build -t lab/org-keyboard:local runners/org-keyboard
 	docker build -t lab/css-lint:local runners/css-lint

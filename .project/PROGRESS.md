@@ -1,6 +1,6 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-11 (Cycle E `static-web` adapter)  
+**Last updated:** 2026-07-11 (Sec SameSite + phpcs/semgrep; Cycle E done)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
 
@@ -12,8 +12,7 @@
 
 **→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-1. SameSite cookie assert + Semgrep/PHPCS-security  
-2. Cycle F — SaaS API / workers  
+1. Cycle F — SaaS API / workers  
 
 ---
 
@@ -28,6 +27,6 @@
 | `quality` L0 + WP runtime (LH budgets/CWV, vnu soft, social, extras) | Done |
 | `wordpress` adapter stub | Done |
 | `org` Gate 1–4 | Done |
-| `sec` S1–S5 (incl. S2 composer + nuclei) | Done |
+| `sec` S1–S5 (SameSite, phpcs-security, semgrep) | Done |
 | `static-web` adapter (Cycle E) | Done |
 | SaaS API | Not started |

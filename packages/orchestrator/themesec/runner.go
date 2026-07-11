@@ -44,6 +44,7 @@ var dangerPatterns = []struct {
 	{"sec.theme.open_redirect", regexp.MustCompile(`(?i)wp_redirect\s*\(\s*\$_(GET|POST|REQUEST)`), domain.SeverityHigh, "wp_redirect on user input"},
 	{"sec.theme.echo_superglobal", regexp.MustCompile(`(?i)echo\s+\$_(GET|POST|REQUEST|COOKIE)`), domain.SeverityHigh, "echo of superglobal without escape"},
 	{"sec.theme.sql_unprepared", regexp.MustCompile(`(?i)\$wpdb->(query|get_results|get_row|get_var)\s*\(\s*["'].*\$_(GET|POST|REQUEST)`), domain.SeverityCritical, "possible unprepared SQL with user input"},
+	{"sec.theme.noescape", regexp.MustCompile(`\|noescape`), domain.SeverityMedium, "|noescape found — review allowlist (trusted WP HTML only)"},
 }
 
 func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Finding, error) {
@@ -60,6 +61,7 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 	base := strings.TrimRight(req.Target.BaseURL, "/")
 	if base != "" {
 		findings = append(findings, r.probeReflectedXSS(ctx, req, base)...)
+		findings = append(findings, r.probeAttrBreakout(ctx, req, base)...)
 		findings = append(findings, r.probeDebugLeak(ctx, req, base)...)
 	}
 
@@ -93,7 +95,7 @@ func (r *Runner) scanZip(req ports.RunnerRequest, zipPath string) []domain.Findi
 		if strings.Contains(lower, "/vendor/") || strings.Contains(lower, "/node_modules/") {
 			continue
 		}
-		if !strings.HasSuffix(lower, ".php") && !strings.HasSuffix(lower, ".inc") {
+		if !strings.HasSuffix(lower, ".php") && !strings.HasSuffix(lower, ".inc") && !strings.HasSuffix(lower, ".latte") {
 			continue
 		}
 		rc, err := zf.Open()
@@ -105,6 +107,13 @@ func (r *Runner) scanZip(req ports.RunnerRequest, zipPath string) []domain.Findi
 		body := string(data)
 		for _, p := range dangerPatterns {
 			if hit[p.code] {
+				continue
+			}
+			isLatte := strings.HasSuffix(lower, ".latte")
+			if isLatte && p.code != "sec.theme.noescape" {
+				continue
+			}
+			if !isLatte && p.code == "sec.theme.noescape" {
 				continue
 			}
 			if p.re.MatchString(body) {
@@ -154,6 +163,29 @@ func (r *Runner) probeReflectedXSS(ctx context.Context, req ports.RunnerRequest,
 	}
 	return []domain.Finding{f(req, "sec.theme.xss_search_ok", domain.SeverityInfo,
 		"search reflected XSS probe did not find raw script payload", u)}
+}
+
+func (r *Runner) probeAttrBreakout(ctx context.Context, req ports.RunnerRequest, base string) []domain.Finding {
+	// Quote breakout in search reflection
+	payload := `" onmouseover="alert(1)" x="`
+	u := base + "/?s=" + url.QueryEscape(payload)
+	hreq, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil
+	}
+	resp, err := r.client.Do(hreq)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 256*1024))
+	s := string(body)
+	if strings.Contains(s, `onmouseover="alert(1)"`) || strings.Contains(s, "onmouseover='alert(1)'") {
+		return []domain.Finding{f(req, "sec.theme.xss_attr_breakout", domain.SeverityCritical,
+			"search query breaks out of attribute context", u)}
+	}
+	return []domain.Finding{f(req, "sec.theme.xss_attr_ok", domain.SeverityInfo,
+		"attribute breakout probe did not find raw event handler", u)}
 }
 
 func (r *Runner) probeDebugLeak(ctx context.Context, req ports.RunnerRequest, base string) []domain.Finding {

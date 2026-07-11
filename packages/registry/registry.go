@@ -40,6 +40,8 @@ func DefaultRunners() []orchestrator.Runner {
 	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "lab/wpscan:local")
 	composerAuditImage := envOr("LAB_COMPOSER_AUDIT_IMAGE", "lab/composer-audit:local")
 	nucleiImage := envOr("LAB_NUCLEI_IMAGE", "lab/nuclei:local")
+	phpcsImage := envOr("LAB_PHPCS_SECURITY_IMAGE", "lab/phpcs-security:local")
+	semgrepImage := envOr("LAB_SEMGREP_IMAGE", "lab/semgrep:local")
 	noticeImage := envOr("LAB_NOTICE_HUNTER_IMAGE", "lab/notice-hunter:local")
 	keyboardImage := envOr("LAB_ORG_KEYBOARD_IMAGE", "lab/org-keyboard:local")
 	cssImage := envOr("LAB_CSS_LINT_IMAGE", "lab/css-lint:local")
@@ -60,6 +62,8 @@ func DefaultRunners() []orchestrator.Runner {
 		docker.New("wpscan", wpscanImage),
 		docker.New("composer-audit", composerAuditImage),
 		docker.New("nuclei", nucleiImage),
+		docker.New("phpcs-security", phpcsImage),
+		docker.New("semgrep", semgrepImage),
 		docker.New("notice-hunter", noticeImage),
 		docker.New("org-keyboard", keyboardImage),
 		docker.New("css-lint", cssImage),

@@ -1,0 +1,53 @@
+rules:
+  - id: lab.php.eval
+    languages: [php]
+    severity: ERROR
+    message: "eval() is banned in theme code"
+    pattern: eval(...)
+  - id: lab.php.unserialize
+    languages: [php]
+    severity: ERROR
+    message: "unserialize() is banned — object injection risk"
+    pattern: unserialize(...)
+  - id: lab.php.shell_exec
+    languages: [php]
+    severity: ERROR
+    message: "shell_exec/system/passthru banned in theme"
+    pattern-either:
+      - pattern: shell_exec(...)
+      - pattern: system(...)
+      - pattern: passthru(...)
+      - pattern: proc_open(...)
+  - id: lab.php.echo_superglobal
+    languages: [php]
+    severity: WARNING
+    message: "echo of superglobal — XSS risk"
+    pattern-either:
+      - pattern: echo $_GET
+      - pattern: echo $_POST
+      - pattern: echo $_REQUEST
+      - pattern: echo $_COOKIE
+  - id: lab.php.wp_redirect_user
+    languages: [php]
+    severity: ERROR
+    message: "wp_redirect on user input — open redirect"
+    patterns:
+      - pattern: wp_redirect($X, ...)
+      - pattern-either:
+          - pattern-inside: |
+              $X = $_GET[...]
+              ...
+          - pattern-inside: |
+              $X = $_POST[...]
+              ...
+          - pattern-inside: |
+              $X = $_REQUEST[...]
+              ...
+  - id: lab.latte.noescape_user
+    languages: [generic]
+    severity: WARNING
+    message: "|noescape on potentially user-controlled content — review allowlist"
+    paths:
+      include:
+        - "*.latte"
+    pattern-regex: '\|noescape'
