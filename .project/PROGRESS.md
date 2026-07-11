@@ -17,7 +17,7 @@
 1. F0 event layer — **done**  
 2. F1 API + worker MVP — **done**  
 3. F2 org + sec job presets — **done** (VPS API E2E)  
-4. F3 dashboard + F4 notify/schedules ← **next**
+4. F3 dashboard + F4 notify/schedules ← **F3.0–F3.3 done** (`make web`); next SSE / F4
 
 ---
 
@@ -34,4 +34,4 @@
 | `org` Gate 1–4 | Done |
 | `sec` S1–S5 (SameSite, phpcs-security, semgrep) | Done |
 | `static-web` adapter (Cycle E) | Done |
-| SaaS API | **F2 done** — org / quality / quality-wp / sec / static-web as jobs |
+| SaaS API | **F3** — dashboard `apps/web` (ui8kit templ) over API |

@@ -4,7 +4,7 @@ Roadmap + checklists for turning local Lab CLI into a **job-based SaaS** that ru
 
 Host context: this lives next to the [VPS runbook](./README.md) because cloud workers will reuse the same Docker images and compose profiles on lab hosts.
 
-**Status:** 2026-07-11 — F0–F2 done; next F3 dashboard.
+**Status:** 2026-07-11 — F0–F3.3 done; next F3.4 SSE / F4 notify.
 
 ---
 
@@ -182,16 +182,23 @@ Paths are snapshotted into the run manifest; adapters resolve relative to `LAB_R
 
 | # | Item | Status |
 |---|------|--------|
-| F3.0 | **F0 UI** — table of runs (lab, status, started, duration, link) | [ ] |
-| F3.1 | Run detail — Report summary + findings table | [ ] |
-| F3.2 | Decision baskets breakdown | [ ] |
-| F3.3 | Timeline from `run_events` (gate → check) | [ ] |
+| F3.0 | **F0 UI** — table of runs (lab, status, started, duration, link) | [x] (`apps/web`, ui8kit templ) |
+| F3.1 | Run detail — Report summary + findings table | [x] |
+| F3.2 | Decision baskets breakdown | [x] |
+| F3.3 | Timeline from `run_events` (gate → check) | [x] |
 | F3.4 | Live SSE while `running` | [ ] |
 | F3.5 | Compare two runs (regression hint) | [ ] |
-| F3.6 | Export markdown / download JSON | [ ] |
+| F3.6 | Export markdown / download JSON | [~] (link to report JSON) |
 
 **Exit:** Operator can watch a run’s checks and open a shareable report without SSH.
 
+```bash
+make api   # :8090
+make web   # :8091  LAB_API_URL=http://127.0.0.1:8090
+# open http://127.0.0.1:8091/
+```
+
+UI primitives: vendored `third_party/ui8kit` (from `@ui8kit/codegen` generated Templ).
 ---
 
 ### F4 — Schedules + Telegram / Slack
@@ -230,8 +237,8 @@ gates: S1✗ S2✓ S3✗ S4~
 3. Postgres via DATABASE_URL / LAB_DATABASE_URL (pgx) ← done
 4. quality preset E2E on workers      ← done (VPS API)
 5. org + sec presets on VPS workers   ← done (F2)
-6. Dashboard F0 → timeline            ← next (F3)
-7. Schedules + Slack/Telegram
+6. Dashboard F0 → timeline            ← done (F3.0–F3.3; SSE later)
+7. Schedules + Slack/Telegram         ← next (F4)
 ```
 
 ### Connection URL (Postgres / Supabase)
@@ -313,7 +320,7 @@ Without URL the API keeps the in-memory store.
 - [x] F0 event layer merged and tested
 - [x] F1 quality job via API on VPS
 - [x] F2 org + sec jobs via API
-- [ ] F3.0–F3.3 dashboard (list + report + timeline)
+- [x] F3.0–F3.3 dashboard (list + report + timeline)
 - [ ] F4 Slack **or** Telegram + one schedule
 
 Nice-to-have after Cycle F: multi-tenant, billing, fancy compare UI (F3.5+).

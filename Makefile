@@ -1,4 +1,4 @@
-.PHONY: test cli demo quality quality-wp static-web org sec api tidy runners org-up quality-up org-seed saas-up
+.PHONY: test cli demo quality quality-wp static-web org sec api web saas-up tidy runners org-up quality-up org-seed
 
 test:
 	go test ./...
@@ -9,7 +9,10 @@ cli:
 api:
 	go run ./apps/api
 
-# Local Postgres for SaaS runstore (LAB_DATABASE_URL)
+# F3 dashboard (needs API up). LAB_API_URL=http://127.0.0.1:8090 LAB_WEB_ADDR=:8091
+web:
+	go run ./apps/web
+
 saas-up:
 	docker compose -f deploy/compose/docker-compose.yml --profile saas up -d postgres
 
@@ -55,7 +58,6 @@ org-up:
 quality-up:
 	docker compose -f deploy/compose/docker-compose.yml --profile quality up -d
 
-# Import Theme Unit Test XML into compose WP and write testdata/fixtures/org-seed.json
 org-seed:
 	docker compose -f deploy/compose/docker-compose.yml --profile org exec -T -u root wpcli \
 		sh -c 'wp plugin install wordpress-importer --activate --force --allow-root >/dev/null 2>&1 || true; \

@@ -3,8 +3,10 @@ module github.com/fastygo/lab
 go 1.26.4
 
 require (
+	github.com/a-h/templ v0.3.1001
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.4
+	github.com/ui8kit/ui v0.0.0
 	golang.org/x/net v0.57.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -19,3 +21,5 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 )
+
+replace github.com/ui8kit/ui => ./third_party/ui8kit
