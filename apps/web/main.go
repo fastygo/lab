@@ -13,10 +13,11 @@ import (
 
 	"github.com/fastygo/lab/apps/web/views"
 	"github.com/fastygo/lab/packages/domain"
+	"github.com/fastygo/lab/packages/reportfmt"
 )
 
-// Cycle F3 dashboard — SSR templ over lab-api JSON.
-const version = "0.1.0-f3"
+// Cycle F dashboard — SSR templ over lab-api JSON.
+const version = "0.1.0-f4"
 
 type apiClient struct {
 	base   string
@@ -79,6 +80,25 @@ func main() {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 		}
 	})
+	mux.HandleFunc("GET /compare", func(w http.ResponseWriter, r *http.Request) {
+		baseID := r.URL.Query().Get("base")
+		headID := r.URL.Query().Get("head")
+		runs, err := api.listRuns(r.Context(), "", 100)
+		props := views.ComparePageProps{APIBase: api.base, BaseID: baseID, HeadID: headID, Runs: runs}
+		if err != nil {
+			props.Err = err.Error()
+		} else if baseID != "" && headID != "" {
+			diff, derr := api.compare(r.Context(), baseID, headID)
+			if derr != nil {
+				props.Err = derr.Error()
+			} else {
+				props.Diff = diff
+			}
+		}
+		if err := views.ComparePage(props).Render(r.Context(), w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -136,6 +156,15 @@ func (a *apiClient) getEvents(ctx context.Context, id string) ([]domain.RunEvent
 		return nil, err
 	}
 	return wrap.Events, nil
+}
+
+func (a *apiClient) compare(ctx context.Context, baseID, headID string) (*reportfmt.Diff, error) {
+	q := url.Values{"base": {baseID}, "head": {headID}}
+	var diff reportfmt.Diff
+	if err := a.getJSON(ctx, "/v1/runs/compare?"+q.Encode(), &diff); err != nil {
+		return nil, err
+	}
+	return &diff, nil
 }
 
 func (a *apiClient) getJSON(ctx context.Context, path string, dest any) error {

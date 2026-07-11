@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fastygo/lab/packages/domain"
+	"github.com/fastygo/lab/packages/reportfmt"
 )
 
 // RunRow is one row from GET /v1/runs (and detail extras).
@@ -42,6 +43,15 @@ type RunDetailProps struct {
 
 func IsLiveStatus(status string) bool {
 	return status == "queued" || status == "running"
+}
+
+type ComparePageProps struct {
+	APIBase string
+	BaseID  string
+	HeadID  string
+	Runs    []RunRow
+	Diff    *reportfmt.Diff
+	Err     string
 }
 
 type BasketCount struct {

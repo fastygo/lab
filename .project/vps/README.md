@@ -223,6 +223,23 @@ Product roadmap (API, workers, dashboard events, schedules, Telegram/Slack):
 
 Workers reuse images from `make runners` and compose profiles from this runbook.
 
+### Deployed services (systemd)
+
+| Unit | Bind | Public |
+|------|------|--------|
+| `lab-api.service` | `:8090` | `http://<VPS>:8090` |
+| `lab-web.service` | `:8092` | `http://<VPS>:8092` (8091 = quality fixture) |
+
+Env: `/etc/fastygo-lab-saas.env` · binaries: `/usr/local/bin/lab-{api,web}`
+
+```bash
+systemctl status lab-api lab-web
+curl -sS http://127.0.0.1:8090/healthz
+curl -sS http://127.0.0.1:8092/healthz
+# optional Postgres: set LAB_DATABASE_URL in the env file and restart
+# optional notify: SLACK_WEBHOOK_URL / TELEGRAM_* 
+```
+
 ---
 
 ## Quick checklist (print / paste)

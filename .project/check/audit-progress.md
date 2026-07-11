@@ -252,7 +252,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. Optional Cycle F polish — F3.5 compare runs / markdown export  
+1. Deploy SaaS stack on VPS (`make api` + `make web` + Postgres URL)  
 2. Optional: deeper XSS Unit Test fixtures  
 
 ---

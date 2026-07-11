@@ -4,7 +4,7 @@ Roadmap + checklists for turning local Lab CLI into a **job-based SaaS** that ru
 
 Host context: this lives next to the [VPS runbook](./README.md) because cloud workers will reuse the same Docker images and compose profiles on lab hosts.
 
-**Status:** 2026-07-11 — Cycle F core done (F0–F4). Optional: F3.5 compare, richer export.
+**Status:** 2026-07-11 — Cycle F complete (F0–F4 + F3.5/F3.6).
 
 ---
 
@@ -187,8 +187,8 @@ Paths are snapshotted into the run manifest; adapters resolve relative to `LAB_R
 | F3.2 | Decision baskets breakdown | [x] |
 | F3.3 | Timeline from `run_events` (gate → check) | [x] |
 | F3.4 | Live SSE while `running` | [x] (`/v1/runs/{id}/events/stream` + dashboard EventSource) |
-| F3.5 | Compare two runs (regression hint) | [ ] |
-| F3.6 | Export markdown / download JSON | [~] (link to report JSON) |
+| F3.5 | Compare two runs (regression hint) | [x] (`GET /v1/runs/compare`, `/compare`) |
+| F3.6 | Export markdown / download JSON | [x] (`/report.md` + JSON) |
 
 **Exit:** Operator can watch a run’s checks and open a shareable report without SSH.
 

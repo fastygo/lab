@@ -18,7 +18,7 @@
 2. F1 API + worker MVP — **done**  
 3. F2 org + sec job presets — **done** (VPS API E2E)  
 4. F3 dashboard + F4 notify/schedules — **done**  
-5. Optional polish: F3.5 compare runs, markdown export
+5. Optional polish: F3.5 compare / markdown — **done**
 
 ---
 

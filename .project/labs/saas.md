@@ -30,5 +30,5 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Status
 
-Cycle F **done** (F0–F4): jobs API, Postgres URL, dashboard+SSE, Slack/Telegram, cron schedules.  
-`POST /v1/schedules` + tick enqueue; `POST …/fire` for manual.
+Cycle F **complete**: jobs API, dashboard+SSE, notify, schedules, compare, markdown export.  
+Compare: `/compare` or `GET /v1/runs/compare?base=&head=`. Report MD: `/v1/runs/{id}/report.md`.

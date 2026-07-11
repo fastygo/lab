@@ -61,11 +61,14 @@ templ RunsPage(p RunsPageProps) {
 	@Layout("Runs") {
 		@Shell(p.APIBase) {
 			@stack.Stack(stack.StackProps{Class: "gap-4"}) {
-				@group.Group(group.GroupProps{Class: "items-center justify-between gap-3"}) {
+					@group.Group(group.GroupProps{Class: "items-center justify-between gap-3"}) {
 					@title.Title(title.TitleProps{As: uiutils.H2, Class: "text-lg font-semibold"}) {
 						Runs
 					}
 					@group.Group(group.GroupProps{Class: "gap-2 text-sm"}) {
+						@link.Link(link.LinkProps{Href: "/compare", Variant: "default"}) {
+							compare
+						}
 						@link.Link(link.LinkProps{Href: "/", Variant: "default"}) {
 							all
 						}
@@ -389,8 +392,16 @@ templ RunDetailPage(p RunDetailProps) {
 							}
 							@separator.Separator(separator.SeparatorProps{Class: "my-0"})
 							@box.Box(box.BoxProps{Class: "px-4 py-3"}) {
-								@link.Link(link.LinkProps{Href: p.APIBase + "/v1/runs/" + p.Run.ID + "/report", Variant: "default", Class: "text-sm"}) {
-									Download report JSON
+								@group.Group(group.GroupProps{Class: "flex-wrap gap-4"}) {
+									@link.Link(link.LinkProps{Href: p.APIBase + "/v1/runs/" + p.Run.ID + "/report", Variant: "default", Class: "text-sm"}) {
+										Download JSON
+									}
+									@link.Link(link.LinkProps{Href: p.APIBase + "/v1/runs/" + p.Run.ID + "/report.md", Variant: "default", Class: "text-sm"}) {
+										Download Markdown
+									}
+									@link.Link(link.LinkProps{Href: "/compare?head=" + p.Run.ID, Variant: "default", Class: "text-sm"}) {
+										Compare…
+									}
 								}
 							}
 						}
