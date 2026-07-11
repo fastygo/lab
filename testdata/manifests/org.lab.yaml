@@ -38,3 +38,11 @@ spec:
             dockerNetwork: fastygo-lab_lab
             wpDataVolume: fastygo-lab_wp_org_data
             internalUrl: http://wordpress
+    - id: C4-keyboard
+      checks:
+        - id: keyboard
+          runner: org-keyboard
+          config:
+            # Browser needs a host-reachable URL (WP redirects away from http://wordpress).
+            dockerNetwork: host
+            internalUrl: http://127.0.0.1:8080

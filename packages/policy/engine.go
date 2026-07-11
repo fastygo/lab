@@ -36,6 +36,20 @@ func packRules(pack string) []Rule {
 			{Code: "quality.axe.ok", Basket: domain.BasketAccept, Rationale: "No axe violations"},
 			{Code: "quality.vnu.ok", Basket: domain.BasketAccept, Rationale: "HTML validates"},
 			{Code: "quality.vnu.no_errors", Basket: domain.BasketAccept, Rationale: "No vnu errors"},
+			{Code: "quality.css.ok", Basket: domain.BasketAccept, Rationale: "CSS parse clean"},
+			{Code: "quality.css.summary", Basket: domain.BasketAccept, Rationale: "CSS lint summary"},
+			{Code: "quality.seo.ok", Basket: domain.BasketAccept, Rationale: "SEO meta OK"},
+			{Code: "quality.seo.summary", Basket: domain.BasketAccept, Rationale: "SEO meta summary"},
+			{Code: "quality.seo.social_skipped", Basket: domain.BasketAccept, Rationale: "Social graph optional"},
+			{Code: "quality.seo.title_ok", Basket: domain.BasketAccept, Rationale: "Title present"},
+			{Code: "quality.seo.viewport_ok", Basket: domain.BasketAccept, Rationale: "Viewport present"},
+			{Code: "quality.seo.h1_ok", Basket: domain.BasketAccept, Rationale: "Single h1"},
+			{Code: "quality.seo.description_ok", Basket: domain.BasketAccept, Rationale: "Description present"},
+			{Code: "quality.seo.description_missing", Basket: domain.BasketAccept, Rationale: "Description soft"},
+			{Code: "quality.extras.ok", Basket: domain.BasketAccept, Rationale: "Viewports + console clean"},
+			{Code: "quality.extras.summary", Basket: domain.BasketAccept, Rationale: "Quality extras summary"},
+			{Code: "quality.viewport.ok", Basket: domain.BasketAccept, Rationale: "Viewport rendered"},
+			{Code: "quality.console.ok", Basket: domain.BasketAccept, Rationale: "Console clean"},
 			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "Docker missing in unit/dev; re-run with Docker for real scores"},
 		}...)
 	case "wordpress-org":
@@ -50,6 +64,12 @@ func packRules(pack string) []Rule {
 			{Code: "org.matrix.smoke_summary", Basket: domain.BasketAccept, Rationale: "HTTP smoke summary"},
 			{Code: "org.notice.ok", Basket: domain.BasketAccept, Rationale: "No theme debug notices"},
 			{Code: "org.notice.summary", Basket: domain.BasketAccept, Rationale: "Notice hunter summary"},
+			{Code: "org.keyboard.ok", Basket: domain.BasketAccept, Rationale: "Keyboard scenarios passed"},
+			{Code: "org.keyboard.summary", Basket: domain.BasketAccept, Rationale: "Keyboard smoke summary"},
+			{Code: "org.keyboard.skip_ok", Basket: domain.BasketAccept, Rationale: "Skip link OK"},
+			{Code: "org.keyboard.nav_ok", Basket: domain.BasketAccept, Rationale: "Primary nav keyboard OK"},
+			{Code: "org.keyboard.sheet_ok", Basket: domain.BasketAccept, Rationale: "Mobile sheet keyboard OK"},
+			{Code: "org.keyboard.search_ok", Basket: domain.BasketAccept, Rationale: "Search keyboard OK"},
 			{Code: "org.themecheck.ok", Basket: domain.BasketAccept, Rationale: "Theme Check clean"},
 			{Code: "org.themecheck.no_required", Basket: domain.BasketAccept, Rationale: "No Theme Check required errors"},
 			{Code: "org.themecheck.plugin_ready", Basket: domain.BasketAccept, Rationale: "Theme Check installed"},
@@ -134,10 +154,26 @@ func heuristic(pack, code string) *domain.Decision {
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Soft-404 — review template"}
 	case pack == "wordpress-org" && code == "org.notice.found":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Theme PHP Notice/Warning/Deprecated under WP_DEBUG"}
+	case pack == "wordpress-org" && hasPrefix(code, "org.keyboard.") &&
+		code != "org.keyboard.ok" && code != "org.keyboard.summary" &&
+		!hasSuffix(code, "_ok"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Keyboard / a11y chrome failure"}
 	case pack == "lightspeed" && hasPrefix(code, "quality.axe.") && code != "quality.axe.ok":
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Axe violation"}
 	case pack == "lightspeed" && (code == "quality.vnu.error" || code == "quality.vnu.fetch_failed" || code == "quality.vnu.exec_failed" || code == "quality.vnu.parse_failed"):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "HTML validation error"}
+	case pack == "lightspeed" && (code == "quality.css.parse_error" || code == "quality.css.forbidden" || code == "quality.css.exec_failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "CSS parse / forbidden rule"}
+	case pack == "lightspeed" && code == "quality.css.no_files":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "No CSS scanned — review fixture/theme"}
+	case pack == "lightspeed" && (code == "quality.seo.title_missing" || code == "quality.seo.viewport_missing" || code == "quality.seo.fetch_failed" || code == "quality.seo.parse_failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "SEO meta hard failure"}
+	case pack == "lightspeed" && code == "quality.seo.h1":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "h1 count — review"}
+	case pack == "lightspeed" && (hasPrefix(code, "quality.viewport.") && code != "quality.viewport.ok" ||
+		hasPrefix(code, "quality.console.") && code != "quality.console.ok" ||
+		code == "quality.extras.exec_failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Viewport / console failure"}
 	case pack == "secure-baseline" && hasPrefix(code, "sec.recon."):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketSiteDefaultOff, Rationale: "Reduce attack surface"}
 	}

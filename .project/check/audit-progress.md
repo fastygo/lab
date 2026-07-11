@@ -4,7 +4,7 @@
 Update this file when a check lands in code. Cycle roadmap stays in [../PROGRESS.md](../PROGRESS.md).
 
 **Legend:** `[x]` implemented · `[~]` partial / scaffold · `[ ]` not started  
-**Last audited:** 2026-07-11 (Gate 3 Unit Test XML + attachment + notice hunter)
+**Last audited:** 2026-07-11 (Quality Q3–Q6 + audit.json emit)
 
 ---
 
@@ -55,7 +55,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Policy: woocommerce refs | [x] | `org.zip.policy_woocommerce` |
 | Policy: `comments_template` | [x] | `org.zip.policy_comments_template` |
 | Policy: contact/newsletter patterns | [x] | `org.zip.policy_contact_form` |
-| Emit `dist/*.audit.json` from wpfasty | [ ] | Lab reports JSON to stdout; wpfasty client wiring later |
+| Emit `dist/*.audit.json` from wpfasty | [x] | `lab run -o`; wpfasty `bun run theme:audit -- <theme>` |
 
 **Gate 1:** done in Lab (P0).
 
@@ -86,10 +86,10 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Skip link first focusable + target `#content` | [ ] | Playwright |
-| Primary nav keyboard | [ ] | |
-| Mobile sheet open/close + aria | [ ] | |
-| Search focusable | [ ] | |
+| Skip link first focusable + target `#content` | [x] | `runners/org-keyboard` → `org.keyboard.skip_*` |
+| Primary nav keyboard | [x] | desktop viewport Tab into `header nav` |
+| Mobile sheet open/close + aria | [x] | Escape closes; `aria-expanded` |
+| Search focusable | [x] | Tab to `input[name=s]` |
 | Block `accessibility-ready` until focus-trap | [x] | via zip-lint tag rule |
 
 ### Org policy / packaging
@@ -127,35 +127,35 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| stylelint / CSS parse runner | [ ] | |
-| Fatal parse = fail | [ ] | |
+| stylelint / CSS parse runner | [x] | `runners/css-lint` → `quality.css.*` |
+| Fatal parse = fail | [x] | + forbidden `expression()` / `behavior:` |
 
 ### Q4 — ARIA / WCAG (axe)
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Docker axe + Playwright | [x] | `runners/axe` |
+| Docker axe + Playwright | [x] | `runners/axe` (uses `browser.newContext`) |
 | WCAG 2.2 AA tags | [x] | |
 | Fail critical/serious | [x] | `quality.axe.*` |
-| Latte chrome-specific asserts (sheet trap, etc.) | [ ] | generic page scan only |
+| Latte chrome-specific asserts (sheet trap, etc.) | [x] | keyboard chrome via Org C4 `org-keyboard`; focus-trap still deferred |
 
 ### Q5 — SEO meta / graph
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| title / viewport asserts | [~] | via Lighthouse SEO only |
-| meta description | [ ] | |
-| Open Graph / Twitter cards (optional profile) | [ ] | |
-| JSON-LD parse (optional) | [ ] | |
+| title / viewport asserts | [x] | `seo-meta` runner |
+| meta description | [x] | soft info if missing |
+| Open Graph / Twitter cards (optional profile) | [~] | gated by `seoSocial=true` |
+| JSON-LD parse (optional) | [~] | count only when `seoSocial=true` |
 
 ### Q6 — Modern extras
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Viewports 360/768/1280 | [ ] | |
-| Console clean | [ ] | |
-| `prefers-reduced-motion` | [ ] | |
-| Broken-link crawl | [ ] | |
+| Viewports 360/768/1280 | [x] | `runners/quality-extras` |
+| Console clean | [x] | pageerror + console.error |
+| `prefers-reduced-motion` | [ ] | deferred |
+| Broken-link crawl | [ ] | deferred |
 
 ### Quality infra
 
@@ -163,8 +163,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | Static fixture adapter | [x] | `adapters/static` + `quality-site` |
 | Compose `quality` + nginx fixture | [x] | profile `quality` |
-| Policy pack `lightspeed` | [x] | includes vnu |
-| Manifest `quality.lab.yaml` (Q1+Q2+Q4) | [x] | |
+| Policy pack `lightspeed` | [x] | includes vnu/css/seo/extras |
+| Manifest `quality.lab.yaml` (Q1–Q6) | [x] | |
 | Logged-out prod-like WP target | [ ] | |
 
 ---
@@ -242,17 +242,17 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Registry adapters/runners | [x] | includes `vnu` |
 | Demo lab | [x] | |
 | WordPress adapter stub | [x] | baseUrl + themeZip + matrix |
-| wpfasty `theme:verify` client | [ ] | |
+| wpfasty `theme:verify` / `theme:audit` client | [~] | `theme:audit` → Lab org `-o dist/*.audit.json`; full verify later |
 | SaaS API / workers | [ ] | Cycle F |
 
 ---
 
 ## Suggested next (priority)
 
-1. **Org Gate 4** — Playwright keyboard (skip link, nav, sheet, search)  
-2. **Quality Q3** — stylelint; then WP target for Q1/Q4  
-3. **Sec S1** — user enum + sensitive files + REST  
-4. **wpfasty** `theme:verify` client  
+1. **Sec S1** — user enum + sensitive files + REST  
+2. **Q1 deepen** — median-of-3 / CWV / WP target for quality  
+3. **Q6 deferred** — prefers-reduced-motion + broken-link crawl  
+4. Cycle E — static-web adapters  
 
 ---
 
@@ -260,8 +260,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 | Area | Done | Partial | Todo |
 |------|------|---------|------|
-| Org Gate 1 | 25 | 0 | 1 (wpfasty audit.json) |
-| Org Gate 2–4 | 14 | 0 | ~4 (Gate 4 Playwright) |
-| Quality Q1–Q6 | 10 | 1 | ~13 |
+| Org Gate 1 | 26 | 0 | 0 |
+| Org Gate 2–4 | 18 | 0 | 0 |
+| Quality Q1–Q6 | 20 | 2 | ~6 |
 | Sec S1–S5 | 6 | 2 | ~15 |
 | Framework | 8 | 0 | 2 |

@@ -81,6 +81,9 @@ body {
   .md\:w-64 {
     width: 16rem;
   }
+  .md\:block {
+    display: block;
+  }
 }
 
 .site-shell {

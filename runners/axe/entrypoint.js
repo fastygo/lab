@@ -13,41 +13,45 @@ const check = process.env.LAB_CHECK_ID || "";
     headless: true,
     args: ["--no-sandbox", "--disable-gpu"],
   });
-  const page = await browser.newPage();
-  await page.goto(target, { waitUntil: "networkidle", timeout: 60000 });
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
-  await browser.close();
+  try {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto(target, { waitUntil: "networkidle", timeout: 60000 });
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
 
-  const findings = [];
-  for (const v of results.violations || []) {
-    const impact = v.impact || "moderate";
-    let severity = "low";
-    if (impact === "critical" || impact === "serious") severity = "high";
-    else if (impact === "moderate") severity = "medium";
-    findings.push({
-      code: `quality.axe.${v.id}`,
-      gate,
-      check,
-      severity,
-      message: `${v.help} (${v.nodes?.length || 0} nodes)`,
-      target,
-      evidence: { impact, description: v.description || "" },
-    });
+    const findings = [];
+    for (const v of results.violations || []) {
+      const impact = v.impact || "moderate";
+      let severity = "low";
+      if (impact === "critical" || impact === "serious") severity = "high";
+      else if (impact === "moderate") severity = "medium";
+      findings.push({
+        code: `quality.axe.${v.id}`,
+        gate,
+        check,
+        severity,
+        message: `${v.help} (${v.nodes?.length || 0} nodes)`,
+        target,
+        evidence: { impact, description: v.description || "" },
+      });
+    }
+    if (findings.length === 0) {
+      findings.push({
+        code: "quality.axe.ok",
+        gate,
+        check,
+        severity: "info",
+        message: "no critical/serious axe violations",
+        target,
+      });
+    }
+    console.log(JSON.stringify({ findings }));
+  } finally {
+    await browser.close();
   }
-  if (findings.length === 0) {
-    findings.push({
-      code: "quality.axe.ok",
-      gate,
-      check,
-      severity: "info",
-      message: "no critical/serious axe violations",
-      target,
-    });
-  }
-  console.log(JSON.stringify({ findings }));
-})().catch((err) => {
+})().catch(async (err) => {
   console.log(
     JSON.stringify({
       findings: [
@@ -62,4 +66,5 @@ const check = process.env.LAB_CHECK_ID || "";
       ],
     })
   );
+  process.exit(0);
 });

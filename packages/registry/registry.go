@@ -12,6 +12,7 @@ import (
 	"github.com/fastygo/lab/packages/orchestrator/docker"
 	"github.com/fastygo/lab/packages/orchestrator/headers"
 	"github.com/fastygo/lab/packages/orchestrator/httpmatrix"
+	"github.com/fastygo/lab/packages/orchestrator/seometa"
 	"github.com/fastygo/lab/packages/orchestrator/stub"
 	"github.com/fastygo/lab/packages/orchestrator/ziplint"
 )
@@ -34,18 +35,25 @@ func DefaultRunners() []orchestrator.Runner {
 	vnuImage := envOr("LAB_VNU_IMAGE", "lab/vnu:local")
 	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "wpscanteam/wpscan:latest")
 	noticeImage := envOr("LAB_NOTICE_HUNTER_IMAGE", "lab/notice-hunter:local")
+	keyboardImage := envOr("LAB_ORG_KEYBOARD_IMAGE", "lab/org-keyboard:local")
+	cssImage := envOr("LAB_CSS_LINT_IMAGE", "lab/css-lint:local")
+	extrasImage := envOr("LAB_QUALITY_EXTRAS_IMAGE", "lab/quality-extras:local")
 
 	return []orchestrator.Runner{
 		stub.New(),
 		ziplint.New(),
 		headers.New(),
 		httpmatrix.New(),
+		seometa.New(),
 		docker.New("lighthouse", lhImage),
 		docker.New("axe", axeImage),
 		docker.New("theme-check", tcImage),
 		docker.New("vnu", vnuImage),
 		docker.New("wpscan", wpscanImage),
 		docker.New("notice-hunter", noticeImage),
+		docker.New("org-keyboard", keyboardImage),
+		docker.New("css-lint", cssImage),
+		docker.New("quality-extras", extrasImage),
 	}
 }
 

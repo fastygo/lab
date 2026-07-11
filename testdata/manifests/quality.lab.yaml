@@ -22,7 +22,25 @@ spec:
       checks:
         - id: vnu-html
           runner: vnu
+    - id: Q3-css
+      checks:
+        - id: css-lint
+          runner: css-lint
+          config:
+            cssDir: testdata/fixtures/quality-site
     - id: Q4-axe
       checks:
         - id: axe-wcag
           runner: axe
+    - id: Q5-seo
+      checks:
+        - id: seo-meta
+          runner: seo-meta
+          config:
+            seoSocial: "false"
+    - id: Q6-extras
+      checks:
+        - id: quality-extras
+          runner: quality-extras
+          config:
+            dockerNetwork: host

@@ -28,6 +28,9 @@ runners:
 	docker build -t lab/vnu:local runners/vnu
 	docker build -t lab/wpscan:local runners/wpscan
 	docker build -t lab/notice-hunter:local runners/notice-hunter
+	docker build -t lab/org-keyboard:local runners/org-keyboard
+	docker build -t lab/css-lint:local runners/css-lint
+	docker build -t lab/quality-extras:local runners/quality-extras
 
 org-up:
 	docker compose -f deploy/compose/docker-compose.yml --profile org up -d

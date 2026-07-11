@@ -1,0 +1,8 @@
+{
+  "name": "lab-css-lint-runner",
+  "private": true,
+  "dependencies": {
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard": "^36.0.1"
+  }
+}

@@ -106,6 +106,15 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 		args = append(args, "-v", fixtures+":/lab/fixtures:ro")
 		env = append(env, "LAB_UNIT_TEST_XML=/lab/fixtures/themeunittestdata.wordpress.xml")
 	}
+	// Optional CSS root for stylelint (static fixture or unpacked theme).
+	if cssDir := firstNonEmpty(req.Check.Config["cssDir"], os.Getenv("LAB_CSS_DIR")); cssDir != "" {
+		abs, err := filepath.Abs(cssDir)
+		if err == nil {
+			cssDir = abs
+		}
+		args = append(args, "-v", cssDir+":/lab/css:ro")
+		env = append(env, "LAB_CSS_DIR=/lab/css")
+	}
 	if seedOut := firstNonEmpty(req.Check.Config["seedOut"], os.Getenv("LAB_SEED_OUT")); seedOut != "" {
 		abs, err := filepath.Abs(seedOut)
 		if err == nil {

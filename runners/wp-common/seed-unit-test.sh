@@ -28,6 +28,15 @@ if ! wp option get lab_unit_test_imported --allow-root >/dev/null 2>&1; then
   wp rewrite flush --hard --allow-root >/dev/null 2>&1 || true
 fi
 
+# Gate 4 needs primary menu for desktop nav + mobile sheet.
+MENU_ID="$(wp menu list --fields=term_id,name --format=csv --allow-root 2>/dev/null | awk -F, 'NR>1 && tolower($2) ~ /short/ {print $1; exit}')"
+if [ -z "${MENU_ID:-}" ]; then
+  MENU_ID="$(wp menu list --fields=term_id --format=csv --allow-root 2>/dev/null | awk -F, 'NR==2 {print $1; exit}')"
+fi
+if [ -n "${MENU_ID:-}" ]; then
+  wp menu location assign "$MENU_ID" primary --allow-root >/dev/null 2>&1 || true
+fi
+
 ATTACH_ID="$(wp post list --post_type=attachment --post_mime_type=image --fields=ID --format=ids --allow-root 2>/dev/null | awk '{print $1}')"
 POST_ID="$(wp post list --post_type=post --post_status=publish --fields=ID --format=ids --allow-root 2>/dev/null | awk '{print $1}')"
 PAGE_ID="$(wp post list --post_type=page --post_status=publish --fields=ID --format=ids --allow-root 2>/dev/null | awk '{print $1}')"

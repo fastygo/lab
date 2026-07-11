@@ -225,8 +225,8 @@ Lighthouse отработал, но набрал 0 баллов. Скорее в
 |---|---------|--------|
 | 1 | **Org Gate 3 remainder** — Theme Unit Test XML import, attachment URL, notice hunter / `debug.log` | `[ ]` |
 | 2 | **Org Gate 2 хвост** — WP_DEBUG log capture | `[ ]` |
-| 3 | **Org Gate 4** — Playwright keyboard (skip link, nav, sheet, search) | `[ ]` |
-| 4 | **Quality Q3** — stylelint | `[ ]` |
+| 3 | **Org Gate 4** — Playwright keyboard (skip link, nav, sheet, search) | `[x]` |
+| 4 | **Quality Q3–Q6** — css-lint, seo-meta, quality-extras + `-o` audit.json | `[x]` |
 | 5 | **Quality** — median×3 LH, byte budgets, CWV, WP target вместо static | `[ ]` / `[~]` |
 | 6 | **Sec S1+** — user enum, sensitive files, REST, CVE API | в основном `[ ]` |
 | 7 | **Cycle E** — static-web adapters; **F** — SaaS | не начато |

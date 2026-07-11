@@ -1,0 +1,18 @@
+/* Minimal fixture stylesheet for Q3 CSS lint. */
+:root {
+  --fg: #111;
+  --bg: #fff;
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: system-ui, sans-serif;
+}
+
+.skip-link:focus {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+}

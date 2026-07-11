@@ -49,6 +49,40 @@ func TestEngineMapLightspeed(t *testing.T) {
 	}
 }
 
+func TestEngineMapLightspeedQ356(t *testing.T) {
+	t.Parallel()
+	e := NewEngine("lightspeed")
+	decisions := e.Map([]domain.Finding{
+		{Code: "quality.css.ok", Severity: domain.SeverityInfo},
+		{Code: "quality.css.parse_error", Severity: domain.SeverityHigh},
+		{Code: "quality.seo.ok", Severity: domain.SeverityInfo},
+		{Code: "quality.seo.title_missing", Severity: domain.SeverityHigh},
+		{Code: "quality.seo.h1", Severity: domain.SeverityMedium},
+		{Code: "quality.viewport.failed", Severity: domain.SeverityHigh},
+		{Code: "quality.console.ok", Severity: domain.SeverityInfo},
+	})
+	by := map[string]domain.Decision{}
+	for _, d := range decisions {
+		by[d.FindingCode] = d
+	}
+	if by["quality.css.ok"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["quality.css.ok"])
+	}
+	if by["quality.css.parse_error"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.css.parse_error"])
+	}
+	if by["quality.seo.title_missing"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.seo.title_missing"])
+	}
+	if by["quality.seo.h1"].Basket != domain.BasketBudget {
+		t.Fatalf("%+v", by["quality.seo.h1"])
+	}
+	if by["quality.viewport.failed"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.viewport.failed"])
+	}
+}
+
+
 func TestEngineMapWordpressOrgGate23(t *testing.T) {
 	t.Parallel()
 	e := NewEngine("wordpress-org")
@@ -73,5 +107,36 @@ func TestEngineMapWordpressOrgGate23(t *testing.T) {
 	}
 	if by["org.themecheck.no_required"].Basket != domain.BasketAccept {
 		t.Fatalf("%+v", by["org.themecheck.no_required"])
+	}
+}
+
+func TestEngineMapWordpressOrgGate4Keyboard(t *testing.T) {
+	t.Parallel()
+	e := NewEngine("wordpress-org")
+	decisions := e.Map([]domain.Finding{
+		{Code: "org.keyboard.ok", Severity: domain.SeverityInfo},
+		{Code: "org.keyboard.skip_ok", Severity: domain.SeverityInfo},
+		{Code: "org.keyboard.skip_missing", Severity: domain.SeverityHigh},
+		{Code: "org.keyboard.nav_unreachable", Severity: domain.SeverityHigh},
+		{Code: "org.keyboard.exec_failed", Severity: domain.SeverityHigh},
+	})
+	by := map[string]domain.Decision{}
+	for _, d := range decisions {
+		by[d.FindingCode] = d
+	}
+	if by["org.keyboard.ok"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["org.keyboard.ok"])
+	}
+	if by["org.keyboard.skip_ok"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["org.keyboard.skip_ok"])
+	}
+	if by["org.keyboard.skip_missing"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["org.keyboard.skip_missing"])
+	}
+	if by["org.keyboard.nav_unreachable"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["org.keyboard.nav_unreachable"])
+	}
+	if by["org.keyboard.exec_failed"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["org.keyboard.exec_failed"])
 	}
 }

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/fastygo/lab/packages/domain"
 	"github.com/fastygo/lab/packages/orchestrator"
@@ -46,7 +48,7 @@ func usage() {
 Usage:
   lab version
   lab labs
-  lab run -f <manifest.yaml>
+  lab run -f <manifest.yaml> [-o|--out <report.json>]
 
 Labs: demo, quality, org, sec
 
@@ -54,7 +56,7 @@ Labs: demo, quality, org, sec
 }
 
 func cmdRun(args []string) error {
-	var path string
+	var path, outPath string
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "-f", "--file":
@@ -63,6 +65,12 @@ func cmdRun(args []string) error {
 				return fmt.Errorf("-f requires a path")
 			}
 			path = args[i]
+		case "-o", "--out":
+			i++
+			if i >= len(args) {
+				return fmt.Errorf("-o requires a path")
+			}
+			outPath = args[i]
 		default:
 			return fmt.Errorf("unknown flag %q", args[i])
 		}
@@ -84,10 +92,23 @@ func cmdRun(args []string) error {
 	if err != nil {
 		return err
 	}
-	enc := json.NewEncoder(os.Stdout)
+
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(report); err != nil {
 		return err
+	}
+	if _, err := os.Stdout.Write(buf.Bytes()); err != nil {
+		return err
+	}
+	if outPath != "" {
+		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+			return fmt.Errorf("create out dir: %w", err)
+		}
+		if err := os.WriteFile(outPath, buf.Bytes(), 0o644); err != nil {
+			return fmt.Errorf("write -o file: %w", err)
+		}
 	}
 	if report.Status == domain.StatusFail {
 		os.Exit(1)
