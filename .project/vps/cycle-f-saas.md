@@ -95,7 +95,7 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 - [x] Unit test: demo run produces ordered events
 - [x] JSON Schema `run-event.schema.json`
 - [ ] CLI flag `--events` (optional stderr/NDJSON) — nice-to-have
-- [ ] Worker sink → Postgres `run_events` (memory `runstore` for F1)
+- [x] Worker sink → Postgres `run_events` when `LAB_DATABASE_URL` / `DATABASE_URL` set (`packages/runstore/postgres`)
 - [x] `GET /v1/runs/{id}/events` (JSON; SSE later in F3)
 
 ---
@@ -123,7 +123,7 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 
 | # | Item | Status |
 |---|------|--------|
-| F1.1 | Postgres schema: `runs`, `run_events`, `artifacts` | [ ] (deferred; memory store) |
+| F1.1 | Postgres schema: `runs`, `run_events`, `artifacts` + `DATABASE_URL` / `LAB_DATABASE_URL` | [x] |
 | F1.2 | `POST /v1/runs` — body: `{ "preset"|"manifestPath", "sync?" }` | [x] |
 | F1.3 | `GET /v1/runs/{id}` — status + progress summary | [x] |
 | F1.4 | `GET /v1/runs/{id}/report` — Report JSON | [x] |
@@ -211,14 +211,26 @@ gates: S1✗ S2✓ S3✗ S4~
 ## Suggested build order (start now)
 
 ```text
-1. EventSink in orchestrator          ← current
-2. runstore memory + apps/api healthz
-3. Worker stub (in-process queue) running quality preset
-4. Postgres + real queue
+1. EventSink in orchestrator          ← done
+2. runstore memory + apps/api + worker MVP ← done
+3. Postgres via DATABASE_URL / LAB_DATABASE_URL (pgx) ← done
+4. quality preset E2E on workers
 5. org + sec presets on VPS workers
 6. Dashboard F0 → timeline
 7. Schedules + Slack/Telegram
 ```
+
+### Connection URL (Postgres / Supabase)
+
+Same **connection string / URI** pattern as Supabase «Database URL» — not a separate product extension:
+
+```text
+postgres://USER:PASSWORD@HOST:5432/DBNAME?sslmode=require
+```
+
+Env: `LAB_DATABASE_URL` or `DATABASE_URL`. Driver: **pgx** (`packages/runstore/postgres`).  
+Local: `docker compose … --profile saas up -d postgres` → `postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable`.  
+Without URL the API keeps the in-memory store.
 
 ---
 

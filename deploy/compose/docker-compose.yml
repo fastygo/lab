@@ -17,13 +17,16 @@
 #   - theme zip at testdata/dist/latte.zip (mounted into runners via docker -v)
 #   - lab run uses dockerNetwork=fastygo-lab_lab + wpDataVolume=fastygo-lab_wp_org_data
 #
-# SaaS (Cycle F) — until Postgres/queue land, run API+worker in-process on the host:
-#   make api          # LAB_API_ADDR=:8090  LAB_REPO_ROOT=<repo>
+# SaaS (Cycle F):
+#   # local Postgres (connection URI — same idea as Supabase DATABASE_URL)
+#   docker compose -f deploy/compose/docker-compose.yml --profile saas up -d postgres
+#   export LAB_DATABASE_URL='postgres://lab:lab@127.0.0.1:5432/lab?sslmode=disable'
+#   # or paste Supabase URI: postgres://...@db.<ref>.supabase.co:5432/postgres?sslmode=require
+#   make api
 #   curl -sS -X POST http://127.0.0.1:8090/v1/runs \
 #     -H 'Content-Type: application/json' \
 #     -d '{"preset":"demo","sync":true}'
-# Compose profile `saas` (Postgres + API image) is planned under F1.1 — see
-# .project/vps/cycle-f-saas.md. Worker shape = same orchestrator as CLI + EventSink.
+# See .project/vps/cycle-f-saas.md. Worker = orchestrator + EventSink (in-process for now).
 #
 # See .project/constructor/compose-profiles.md
 
@@ -36,8 +39,31 @@ networks:
 volumes:
   wp_org_data:
   db_org_data:
+  lab_pg_data:
 
 services:
+  # Cycle F — Postgres for runstore (LAB_DATABASE_URL / DATABASE_URL connection URI)
+  postgres:
+    profiles: ["saas"]
+    image: postgres:16-alpine
+    networks: [lab]
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: lab
+    ports:
+      - "${LAB_PG_PORT:-5432}:5432"
+    volumes:
+      - lab_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d lab"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    labels:
+      lab.fastygo.dev/role: postgres
+      lab.fastygo.dev/profile: saas
+
   lab-smoke-stub:
     profiles: ["smoke"]
     image: alpine:3.20

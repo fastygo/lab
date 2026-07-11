@@ -30,4 +30,5 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Status
 
-F0 done. F1 MVP: create/list/get run, report, events; sync or queue; demo preset green in tests. Postgres + quality E2E still open.
+F0 done. F1 MVP: create/list/get run, report, events; sync or queue; demo preset green in tests.  
+Postgres: `LAB_DATABASE_URL` / `DATABASE_URL` (connection URI, pgx) → `packages/runstore/postgres`; else memory. Quality E2E still open.

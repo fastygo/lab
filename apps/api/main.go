@@ -15,16 +15,20 @@ import (
 	"github.com/fastygo/lab/packages/registry"
 	"github.com/fastygo/lab/packages/runstore"
 	runmem "github.com/fastygo/lab/packages/runstore/memory"
+	runpg "github.com/fastygo/lab/packages/runstore/postgres"
 	"github.com/fastygo/lab/packages/worker"
 	"gopkg.in/yaml.v3"
 )
 
-// Cycle F API — runs + in-process worker (memory store).
+// Cycle F API — runs + in-process worker.
+// Store: memory by default; Postgres when LAB_DATABASE_URL or DATABASE_URL is set
+// (postgres://… connection URI — same idea as Supabase).
 // Spec: .project/vps/cycle-f-saas.md
 const version = "0.1.0-f1"
 
 type server struct {
 	store    runstore.Store
+	backend  string
 	repoRoot string
 	queue    chan string
 	wg       sync.WaitGroup
@@ -40,8 +44,17 @@ type createRunRequest struct {
 func main() {
 	addr := envOr("LAB_API_ADDR", ":8090")
 	root := envOr("LAB_REPO_ROOT", registry.FindRepoRoot())
+	store, backend, closer, err := openStore(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: store: %v\n", err)
+		os.Exit(1)
+	}
+	if closer != nil {
+		defer closer()
+	}
 	s := &server{
-		store:    runmem.New(),
+		store:    store,
+		backend:  backend,
 		repoRoot: root,
 		queue:    make(chan string, 64),
 	}
@@ -64,11 +77,27 @@ func main() {
 	mux.HandleFunc("GET /v1/runs/{id}/report", s.handleGetReport)
 	mux.HandleFunc("GET /v1/runs/{id}/events", s.handleGetEvents)
 
-	fmt.Fprintf(os.Stderr, "lab-api %s listening on %s (repo=%s workers=%d)\n", version, addr, root, workers)
+	fmt.Fprintf(os.Stderr, "lab-api %s listening on %s (repo=%s workers=%d store=%s)\n", version, addr, root, workers, backend)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// openStore picks Postgres when a connection URL is set (Supabase-style DATABASE_URL).
+func openStore(ctx context.Context) (runstore.Store, string, func(), error) {
+	url := os.Getenv("LAB_DATABASE_URL")
+	if url == "" {
+		url = os.Getenv("DATABASE_URL")
+	}
+	if url == "" {
+		return runmem.New(), "memory", nil, nil
+	}
+	pg, err := runpg.Open(ctx, url)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	return pg, "postgres", pg.Close, nil
 }
 
 func (s *server) loop() {
@@ -89,6 +118,7 @@ func (s *server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 		"service": "lab-api",
 		"version": version,
 		"cycle":   "F1",
+		"store":   s.backend,
 		"ts":      time.Now().UTC().Format(time.RFC3339),
 		"roadmap": "see .project/vps/cycle-f-saas.md",
 	})

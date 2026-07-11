@@ -246,7 +246,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | WordPress adapter stub | [x] | baseUrl + themeZip + matrix |
 | `static-web` adapter (Cycle E) | [x] | dist SPA serve + optional vite preview |
 | wpfasty `theme:verify` / `theme:audit` client | [~] | `theme:audit` → Lab org `-o dist/*.audit.json`; full verify later |
-| SaaS API / workers | [~] | Cycle F — F1 MVP (memory + demo sync); [.project/vps/cycle-f-saas.md](../vps/cycle-f-saas.md) |
+| SaaS API / workers | [~] | Cycle F — F1 + Postgres URI (`LAB_DATABASE_URL`); [.project/vps/cycle-f-saas.md](../vps/cycle-f-saas.md) |
 
 ---
 
