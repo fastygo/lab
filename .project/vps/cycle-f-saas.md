@@ -4,7 +4,7 @@ Roadmap + checklists for turning local Lab CLI into a **job-based SaaS** that ru
 
 Host context: this lives next to the [VPS runbook](./README.md) because cloud workers will reuse the same Docker images and compose profiles on lab hosts.
 
-**Status:** 2026-07-11 — F0–F3 done; F4 notify ready; schedules next.
+**Status:** 2026-07-11 — Cycle F core done (F0–F4). Optional: F3.5 compare, richer export.
 
 ---
 
@@ -205,8 +205,8 @@ UI primitives: vendored `third_party/ui8kit` (from `@ui8kit/codegen` generated T
 
 | # | Item | Status |
 |---|------|--------|
-| F4.1 | Table `schedules` (cron, lab preset, notify channels, enabled) | [ ] |
-| F4.2 | Scheduler tick → enqueue run | [ ] |
+| F4.1 | Table `schedules` (cron, lab preset, notify channels, enabled) | [x] |
+| F4.2 | Scheduler tick → enqueue run | [x] (`LAB_SCHEDULER_INTERVAL`, default 30s) |
 | F4.3 | Slack incoming webhook notifier on `run.finished` | [x] (`SLACK_WEBHOOK_URL`) |
 | F4.4 | Telegram bot notifier (`sendMessage`) | [x] (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) |
 | F4.5 | Notify filters: `always` \| `fail` \| `warn+fail` | [x] (`LAB_NOTIFY_ON`) |
@@ -223,10 +223,21 @@ gates: S1✗ S2✓ S3✗ S4~
 
 **VPS checklist (F4)**
 
-- [ ] `SLACK_WEBHOOK_URL` and/or `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` on worker/API
-- [ ] Weekly cron smoke: quality fixture
-- [ ] Alert only on fail for sec nightly (noise control)
+- [x] `SLACK_WEBHOOK_URL` and/or `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` on worker/API
+- [x] Scheduler API: `POST /v1/schedules` + tick enqueue (e.g. weekly quality)
+- [x] Alert filter via `LAB_NOTIFY_ON` (e.g. `fail` for sec nightly)
 
+### Schedules API
+
+```bash
+# every hour on the hour — quality preset
+curl -sS -X POST http://127.0.0.1:8090/v1/schedules \
+  -H 'Content-Type: application/json' \
+  -d '{"cron":"0 * * * *","preset":"quality","enabled":true}'
+
+# fire now
+curl -sS -X POST http://127.0.0.1:8090/v1/schedules/<id>/fire
+```
 ---
 
 ## Suggested build order (start now)
@@ -238,7 +249,7 @@ gates: S1✗ S2✓ S3✗ S4~
 4. quality preset E2E on workers      ← done (VPS API)
 5. org + sec presets on VPS workers   ← done (F2)
 6. Dashboard F0 → timeline + SSE     ← done (F3)
-7. Schedules + Slack/Telegram         ← notify done; schedules (F4.1–F4.2) next
+7. Schedules + Slack/Telegram         ← done (F4)
 ```
 
 ### Connection URL (Postgres / Supabase)
@@ -322,7 +333,7 @@ Without URL the API keeps the in-memory store.
 - [x] F2 org + sec jobs via API
 - [x] F3.0–F3.3 dashboard (list + report + timeline)
 - [x] F3.4 SSE live timeline
-- [~] F4 Slack/Telegram notify (schedules still open)
+- [x] F4 Slack/Telegram + schedules
 
 Nice-to-have after Cycle F: multi-tenant, billing, fancy compare UI (F3.5+).
 

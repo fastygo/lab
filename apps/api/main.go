@@ -23,7 +23,7 @@ import (
 
 // Cycle F API — runs + in-process worker + SSE + notify.
 // Spec: .project/vps/cycle-f-saas.md
-const version = "0.1.0-f3"
+const version = "0.1.0-f4"
 
 type server struct {
 	store    runstore.Store
@@ -84,6 +84,14 @@ func main() {
 	mux.HandleFunc("GET /v1/runs/{id}/events", s.handleGetEvents)
 	mux.HandleFunc("GET /v1/runs/{id}/events/stream", s.handleEventsStream)
 	mux.HandleFunc("POST /v1/notify/test", s.handleNotifyTest)
+	mux.HandleFunc("GET /v1/schedules", s.handleListSchedules)
+	mux.HandleFunc("POST /v1/schedules", s.handleCreateSchedule)
+	mux.HandleFunc("GET /v1/schedules/{id}", s.handleGetSchedule)
+	mux.HandleFunc("PATCH /v1/schedules/{id}", s.handleUpdateSchedule)
+	mux.HandleFunc("DELETE /v1/schedules/{id}", s.handleDeleteSchedule)
+	mux.HandleFunc("POST /v1/schedules/{id}/fire", s.handleFireSchedule)
+
+	go s.scheduleLoop()
 
 	fmt.Fprintf(os.Stderr, "lab-api %s listening on %s (repo=%s workers=%d store=%s notify=%v)\n", version, addr, root, workers, backend, s.notify.Enabled())
 	if err := http.ListenAndServe(addr, mux); err != nil {
@@ -159,7 +167,7 @@ func (s *server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 		"ok":      true,
 		"service": "lab-api",
 		"version": version,
-		"cycle":   "F3",
+		"cycle":   "F4",
 		"store":   s.backend,
 		"notify":  s.notify.Enabled(),
 		"ts":      time.Now().UTC().Format(time.RFC3339),

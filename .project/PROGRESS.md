@@ -17,7 +17,8 @@
 1. F0 event layer — **done**  
 2. F1 API + worker MVP — **done**  
 3. F2 org + sec job presets — **done** (VPS API E2E)  
-4. F3 dashboard + F4 notify ← **F3 done + Slack/Telegram**; next schedules (F4.1)
+4. F3 dashboard + F4 notify/schedules — **done**  
+5. Optional polish: F3.5 compare runs, markdown export
 
 ---
 
@@ -34,4 +35,4 @@
 | `org` Gate 1–4 | Done |
 | `sec` S1–S5 (SameSite, phpcs-security, semgrep) | Done |
 | `static-web` adapter (Cycle E) | Done |
-| SaaS API | **F3+notify** — SSE timeline; Slack/Telegram on finish |
+| SaaS API | **Cycle F done** — API, dashboard, SSE, notify, schedules |

@@ -38,3 +38,20 @@ CREATE TABLE IF NOT EXISTS artifacts (
 );
 
 CREATE INDEX IF NOT EXISTS artifacts_run_id_idx ON artifacts (run_id, created_at);
+
+CREATE TABLE IF NOT EXISTS schedules (
+    id           UUID PRIMARY KEY,
+    cron         TEXT NOT NULL,
+    preset       TEXT NOT NULL,
+    lab          TEXT NOT NULL DEFAULT '',
+    enabled      BOOLEAN NOT NULL DEFAULT true,
+    theme_zip    TEXT NOT NULL DEFAULT '',
+    base_url     TEXT NOT NULL DEFAULT '',
+    root         TEXT NOT NULL DEFAULT '',
+    last_run_at  TIMESTAMPTZ,
+    next_run_at  TIMESTAMPTZ,
+    created_at   TIMESTAMPTZ NOT NULL,
+    updated_at   TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS schedules_enabled_next_idx ON schedules (enabled, next_run_at);

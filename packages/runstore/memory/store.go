@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/fastygo/lab/packages/domain"
 	"github.com/fastygo/lab/packages/runstore"
@@ -12,16 +13,19 @@ import (
 
 // Store is an in-memory runstore.Store for F0/F1 stubs.
 type Store struct {
-	mu     sync.Mutex
-	runs   map[string]*runstore.Run
-	events map[string][]domain.RunEvent
-	order  []string
+	mu        sync.Mutex
+	runs      map[string]*runstore.Run
+	events    map[string][]domain.RunEvent
+	order     []string
+	schedules map[string]*runstore.Schedule
+	schedOrd  []string
 }
 
 func New() *Store {
 	return &Store{
-		runs:   map[string]*runstore.Run{},
-		events: map[string][]domain.RunEvent{},
+		runs:      map[string]*runstore.Run{},
+		events:    map[string][]domain.RunEvent{},
+		schedules: map[string]*runstore.Schedule{},
 	}
 }
 
@@ -97,4 +101,72 @@ func (s *Store) ListEvents(_ context.Context, runID string) ([]domain.RunEvent, 
 	out := make([]domain.RunEvent, len(src))
 	copy(out, src)
 	return out, nil
+}
+
+func (s *Store) CreateSchedule(_ context.Context, sch *runstore.Schedule) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if sch.ID == "" {
+		sch.ID = uuid.NewString()
+	}
+	now := time.Now().UTC()
+	if sch.CreatedAt.IsZero() {
+		sch.CreatedAt = now
+	}
+	sch.UpdatedAt = now
+	cp := *sch
+	s.schedules[cp.ID] = &cp
+	s.schedOrd = append(s.schedOrd, cp.ID)
+	return nil
+}
+
+func (s *Store) GetSchedule(_ context.Context, id string) (*runstore.Schedule, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sch, ok := s.schedules[id]
+	if !ok {
+		return nil, fmt.Errorf("schedule %q not found", id)
+	}
+	cp := *sch
+	return &cp, nil
+}
+
+func (s *Store) ListSchedules(_ context.Context) ([]*runstore.Schedule, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := make([]*runstore.Schedule, 0, len(s.schedOrd))
+	for _, id := range s.schedOrd {
+		cp := *s.schedules[id]
+		out = append(out, &cp)
+	}
+	return out, nil
+}
+
+func (s *Store) UpdateSchedule(_ context.Context, sch *runstore.Schedule) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.schedules[sch.ID]; !ok {
+		return fmt.Errorf("schedule %q not found", sch.ID)
+	}
+	sch.UpdatedAt = time.Now().UTC()
+	cp := *sch
+	s.schedules[sch.ID] = &cp
+	return nil
+}
+
+func (s *Store) DeleteSchedule(_ context.Context, id string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.schedules[id]; !ok {
+		return fmt.Errorf("schedule %q not found", id)
+	}
+	delete(s.schedules, id)
+	ord := s.schedOrd[:0]
+	for _, x := range s.schedOrd {
+		if x != id {
+			ord = append(ord, x)
+		}
+	}
+	s.schedOrd = ord
+	return nil
 }

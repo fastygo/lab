@@ -30,5 +30,5 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Status
 
-F0–F3 done (+ F4 notify). Dashboard: `make web` with live SSE on running jobs.  
-Notify: `SLACK_WEBHOOK_URL` / Telegram env; `POST /v1/notify/test`. Schedules still open.
+Cycle F **done** (F0–F4): jobs API, Postgres URL, dashboard+SSE, Slack/Telegram, cron schedules.  
+`POST /v1/schedules` + tick enqueue; `POST …/fire` for manual.

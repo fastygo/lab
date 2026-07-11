@@ -33,7 +33,7 @@ type Run struct {
 	FinishedAt   *time.Time      `json:"finishedAt,omitempty"`
 }
 
-// Store persists runs and events.
+// Store persists runs, events, and schedules.
 type Store interface {
 	CreateRun(ctx context.Context, run *Run) error
 	GetRun(ctx context.Context, id string) (*Run, error)
@@ -41,4 +41,5 @@ type Store interface {
 	UpdateRun(ctx context.Context, run *Run) error
 	AppendEvent(ctx context.Context, runID string, ev domain.RunEvent) error
 	ListEvents(ctx context.Context, runID string) ([]domain.RunEvent, error)
+	ScheduleStore
 }
