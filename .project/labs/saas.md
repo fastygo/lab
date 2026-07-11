@@ -20,13 +20,14 @@ Run existing labs (`org`, `quality`, `sec`, …) as **jobs** with:
 
 ## Components
 
-| Piece | Path (planned) |
-|-------|----------------|
+| Piece | Path |
+|-------|------|
 | Event port | `packages/orchestrator/ports.EventSink` |
-| API | `apps/api` |
-| Worker | `apps/worker` or `apps/api` worker mode |
-| Store | `packages/runstore` |
+| API | `apps/api` (`make api`, `:8090`) |
+| Worker | in-process in `apps/api` + `packages/worker` |
+| Presets | `packages/presets` |
+| Store | `packages/runstore` (+ `memory`) |
 
 ## Status
 
-F0 event layer in orchestrator — started.
+F0 done. F1 MVP: create/list/get run, report, events; sync or queue; demo preset green in tests. Postgres + quality E2E still open.

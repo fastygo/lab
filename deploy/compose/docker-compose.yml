@@ -17,6 +17,14 @@
 #   - theme zip at testdata/dist/latte.zip (mounted into runners via docker -v)
 #   - lab run uses dockerNetwork=fastygo-lab_lab + wpDataVolume=fastygo-lab_wp_org_data
 #
+# SaaS (Cycle F) — until Postgres/queue land, run API+worker in-process on the host:
+#   make api          # LAB_API_ADDR=:8090  LAB_REPO_ROOT=<repo>
+#   curl -sS -X POST http://127.0.0.1:8090/v1/runs \
+#     -H 'Content-Type: application/json' \
+#     -d '{"preset":"demo","sync":true}'
+# Compose profile `saas` (Postgres + API image) is planned under F1.1 — see
+# .project/vps/cycle-f-saas.md. Worker shape = same orchestrator as CLI + EventSink.
+#
 # See .project/constructor/compose-profiles.md
 
 name: fastygo-lab

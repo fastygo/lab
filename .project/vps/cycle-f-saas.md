@@ -4,7 +4,7 @@ Roadmap + checklists for turning local Lab CLI into a **job-based SaaS** that ru
 
 Host context: this lives next to the [VPS runbook](./README.md) because cloud workers will reuse the same Docker images and compose profiles on lab hosts.
 
-**Status:** started 2026-07-11 — F0 event layer in code.
+**Status:** 2026-07-11 — F0 done; F1 MVP (memory store + in-process worker + demo preset).
 
 ---
 
@@ -95,14 +95,14 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 - [x] Unit test: demo run produces ordered events
 - [x] JSON Schema `run-event.schema.json`
 - [ ] CLI flag `--events` (optional stderr/NDJSON) — nice-to-have
-- [ ] Worker sink → Postgres `run_events`
-- [ ] `GET /v1/runs/{id}/events` + SSE
+- [ ] Worker sink → Postgres `run_events` (memory `runstore` for F1)
+- [x] `GET /v1/runs/{id}/events` (JSON; SSE later in F3)
 
 ---
 
 ## Phased roadmap
 
-### F0 — Foundation (in progress)
+### F0 — Foundation (done)
 
 **Intent:** domain + orchestrator ready for SaaS without shipping HTTP yet.
 
@@ -113,7 +113,7 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 | F0.3 | Spec docs: this file + `.project/labs/saas.md` | [x] |
 | F0.4 | Skeleton `apps/api` (healthz only) | [x] |
 | F0.5 | Skeleton `packages/runstore` interface (memory) | [x] |
-| F0.6 | Compose profile note `saas` (worker shape) | [ ] |
+| F0.6 | Compose profile note `saas` (worker shape) | [x] |
 
 **Exit:** `go test` green; demo run records ≥ `run.started` … `run.finished`.
 
@@ -123,16 +123,16 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 
 | # | Item | Status |
 |---|------|--------|
-| F1.1 | Postgres schema: `runs`, `run_events`, `artifacts` | [ ] |
-| F1.2 | `POST /v1/runs` — body: `{ "lab": "quality", "manifestRef"|"preset", "artifact?" }` | [ ] |
-| F1.3 | `GET /v1/runs/{id}` — status + progress summary | [ ] |
-| F1.4 | `GET /v1/runs/{id}/report` — Report JSON | [ ] |
-| F1.5 | `GET /v1/runs` — list/filter | [ ] |
-| F1.6 | Worker process: dequeue → `orchestrator.Run` → save report + events | [ ] |
+| F1.1 | Postgres schema: `runs`, `run_events`, `artifacts` | [ ] (deferred; memory store) |
+| F1.2 | `POST /v1/runs` — body: `{ "preset"|"manifestPath", "sync?" }` | [x] |
+| F1.3 | `GET /v1/runs/{id}` — status + progress summary | [x] |
+| F1.4 | `GET /v1/runs/{id}/report` — Report JSON | [x] |
+| F1.5 | `GET /v1/runs` — list/filter | [x] |
+| F1.6 | Worker process: dequeue → `orchestrator.Run` → save report + events | [x] (in-process) |
 | F1.7 | Preset `quality` (static fixture) E2E on VPS worker | [ ] |
 | F1.8 | Artifact upload or `themeZip` / fixture path binding | [ ] |
 
-**Exit:** Dashboard-less curl can create a quality run and fetch a Report.
+**Exit:** Dashboard-less curl can create a **demo** run and fetch a Report (quality when runners available).
 
 **VPS checklist (F1)**
 
