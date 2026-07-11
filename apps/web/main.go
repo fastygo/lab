@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fastygo/lab/apps/web/views"
@@ -20,16 +22,21 @@ import (
 const version = "0.1.0-f4"
 
 type apiClient struct {
-	base   string
+	base   string // internal URL for server→API calls (often loopback)
 	client *http.Client
 }
 
 func main() {
 	addr := envOr("LAB_WEB_ADDR", ":8091")
-	apiBase := envOr("LAB_API_URL", "http://127.0.0.1:8090")
+	apiBase := stringsTrimRightSlash(envOr("LAB_API_URL", "http://127.0.0.1:8090"))
+	// Browser-facing API origin (healthz / report links). Falls back to request Host when empty.
+	apiPublicConfigured := stringsTrimRightSlash(os.Getenv("LAB_API_PUBLIC_URL"))
 	api := &apiClient{
-		base:   stringsTrimRightSlash(apiBase),
+		base:   apiBase,
 		client: &http.Client{Timeout: 30 * time.Second},
+	}
+	publicAPI := func(r *http.Request) string {
+		return resolvePublicAPIBase(r, api.base, apiPublicConfigured)
 	}
 	staticDir := filepath.Join(findWebRoot(), "static")
 
@@ -38,7 +45,7 @@ func main() {
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		lab := r.URL.Query().Get("lab")
 		runs, err := api.listRuns(r.Context(), lab, 50)
-		props := views.RunsPageProps{APIBase: api.base, Lab: lab, Runs: runs}
+		props := views.RunsPageProps{APIBase: publicAPI(r), Lab: lab, Runs: runs}
 		if err != nil {
 			props.Err = err.Error()
 		}
@@ -49,7 +56,7 @@ func main() {
 	mux.HandleFunc("GET /runs/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		run, err := api.getRun(r.Context(), id)
-		props := views.RunDetailProps{APIBase: api.base, Run: run}
+		props := views.RunDetailProps{APIBase: publicAPI(r), Run: run}
 		if err != nil {
 			props.Err = err.Error()
 		} else {
@@ -84,7 +91,7 @@ func main() {
 		baseID := r.URL.Query().Get("base")
 		headID := r.URL.Query().Get("head")
 		runs, err := api.listRuns(r.Context(), "", 100)
-		props := views.ComparePageProps{APIBase: api.base, BaseID: baseID, HeadID: headID, Runs: runs}
+		props := views.ComparePageProps{APIBase: publicAPI(r), BaseID: baseID, HeadID: headID, Runs: runs}
 		if err != nil {
 			props.Err = err.Error()
 		} else if baseID != "" && headID != "" {
@@ -99,18 +106,53 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"ok": true, "service": "lab-web", "version": version, "api": api.base,
+			"ok": true, "service": "lab-web", "version": version,
+			"api": api.base, "apiPublic": publicAPI(r),
 		})
 	})
 
-	fmt.Fprintf(os.Stderr, "lab-web %s listening on %s (api=%s)\n", version, addr, api.base)
+	fmt.Fprintf(os.Stderr, "lab-web %s listening on %s (api=%s public=%s)\n", version, addr, api.base, orDash(apiPublicConfigured))
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// resolvePublicAPIBase picks the API origin shown in the browser.
+// LAB_API_PUBLIC_URL wins; otherwise same host as the dashboard request + API port.
+func resolvePublicAPIBase(r *http.Request, internal, configured string) string {
+	if configured != "" {
+		return configured
+	}
+	host := r.Host
+	if host == "" {
+		return internal
+	}
+	hostname, _, err := net.SplitHostPort(host)
+	if err != nil {
+		hostname = host
+	}
+	apiPort := "8090"
+	if u, err := url.Parse(internal); err == nil {
+		if p := u.Port(); p != "" {
+			apiPort = p
+		}
+	}
+	scheme := "http"
+	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
+		scheme = "https"
+	}
+	return scheme + "://" + net.JoinHostPort(hostname, apiPort)
+}
+
+func orDash(s string) string {
+	if s == "" {
+		return "(derive from Host)"
+	}
+	return s
 }
 
 func (a *apiClient) listRuns(ctx context.Context, lab string, limit int) ([]views.RunRow, error) {
