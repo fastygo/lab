@@ -215,6 +215,16 @@ Until then, treat **§1–§7** as the supported clean-VPS path.
 
 ---
 
+## Cycle F — SaaS on this host
+
+Product roadmap (API, workers, dashboard events, schedules, Telegram/Slack):
+
+→ **[cycle-f-saas.md](./cycle-f-saas.md)**
+
+Workers reuse images from `make runners` and compose profiles from this runbook.
+
+---
+
 ## Quick checklist (print / paste)
 
 - [ ] Debian/Ubuntu VPS, ports 22/8080/(8091)
@@ -228,4 +238,4 @@ Until then, treat **§1–§7** as the supported clean-VPS path.
 - [ ] `go run ./apps/cli run -f testdata/manifests/org.lab.yaml -o /tmp/org.audit.json`
 - [ ] `go run ./apps/cli run -f testdata/manifests/quality.lab.yaml -o /tmp/quality.audit.json`
 
-Related: [../constructor/compose-profiles.md](../constructor/compose-profiles.md), [../../deploy/bootstrap-server.sh](../../deploy/bootstrap-server.sh), [../labs/quality.md](../labs/quality.md).
+Related: [../constructor/compose-profiles.md](../constructor/compose-profiles.md), [../../deploy/bootstrap-server.sh](../../deploy/bootstrap-server.sh), [../labs/quality.md](../labs/quality.md), [cycle-f-saas.md](./cycle-f-saas.md).

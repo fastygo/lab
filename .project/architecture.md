@@ -26,10 +26,13 @@ packages/policy/          PolicyEngine
 packages/orchestrator/    Run(ctx, manifest) → Report
 packages/adapters/noop/   Fixture adapter for TDD / demo
 apps/cli/                 lab binary
-runners/                  Container entrypoints (contract only in Cycle A)
+apps/api/                 Cycle F HTTP skeleton (healthz)
+packages/runstore/        SaaS job + event persistence ports
+runners/                  Container entrypoints
 deploy/compose/           Local lab profiles
 testdata/manifests/       Example lab manifests
 .project/                 Constructor KB
+.project/vps/             VPS runbook + Cycle F SaaS roadmap
 ```
 
 ## Module
@@ -43,9 +46,15 @@ testdata/manifests/       Example lab manifests
 | Mode | Execution |
 |------|-----------|
 | Local | CLI + Compose profiles (`smoke`, `org`, `sec`, `quality`) |
-| SaaS (future) | API accepts artifact → queue → worker runs same Manifest → report store |
+| SaaS (Cycle F) | API accepts job → queue → worker runs same Manifest → report + **event stream** store |
 
-Same **Lab Manifest** and **Report** schema in both modes.
+Same **Lab Manifest** and **Report** schema in both modes. Progress uses `domain.RunEvent` via `ports.EventSink` (see [vps/cycle-f-saas.md](./vps/cycle-f-saas.md)).
+
+```text
+apps/cli | apps/api (Cycle F)
+        ↓
+packages/orchestrator     # Run + EventSink
+```
 
 ## Scaling
 

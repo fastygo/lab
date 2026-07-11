@@ -1,10 +1,13 @@
-.PHONY: test cli demo quality quality-wp static-web org sec tidy runners org-up quality-up org-seed
+.PHONY: test cli demo quality quality-wp static-web org sec api tidy runners org-up quality-up org-seed
 
 test:
 	go test ./...
 
 cli:
 	go run ./apps/cli $(ARGS)
+
+api:
+	go run ./apps/api
 
 demo:
 	go run ./apps/cli run -f testdata/manifests/demo.lab.yaml

@@ -56,11 +56,12 @@ func TestRunDemoManifest(t *testing.T) {
 	}
 
 	store := memory.New()
+	events := memory.NewEventSink()
 	eng := orchestrator.New(
 		[]orchestrator.TargetAdapter{noop.New()},
 		[]orchestrator.Runner{stub.New()},
 		store,
-	)
+	).WithEvents(events).WithRunID("test-run-1")
 	report, err := eng.Run(context.Background(), m)
 	if err != nil {
 		t.Fatal(err)
@@ -73,5 +74,28 @@ func TestRunDemoManifest(t *testing.T) {
 	}
 	if len(store.Reports) != 1 {
 		t.Fatalf("store reports=%d", len(store.Reports))
+	}
+	types := events.Types()
+	wantOrder := []string{
+		"run.started",
+		"adapter.ready",
+		"gate.started",
+		"check.started",
+		"check.finished",
+		"check.started",
+		"check.finished",
+		"gate.finished",
+		"run.finished",
+	}
+	if len(types) != len(wantOrder) {
+		t.Fatalf("events=%v", types)
+	}
+	for i, w := range wantOrder {
+		if types[i] != w {
+			t.Fatalf("event[%d]=%s want %s full=%v", i, types[i], w, types)
+		}
+	}
+	if events.Events[0].RunID != "test-run-1" {
+		t.Fatalf("runId=%q", events.Events[0].RunID)
 	}
 }

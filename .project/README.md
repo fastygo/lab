@@ -35,6 +35,7 @@ Read this first, then [PROGRESS.md](./PROGRESS.md), then the open cycle.
 | [check/](./check/) | Product checklists (theme / validate / security) |
 | [check/audit-progress.md](./check/audit-progress.md) | **Full check coverage** `[x]` / `[~]` / `[ ]` |
 | [vps/README.md](./vps/README.md) | **Clean VPS from source** — bootstrap runbook (EN) |
+| [vps/cycle-f-saas.md](./vps/cycle-f-saas.md) | **Cycle F** SaaS roadmap + checklists (events, API, notify) |
 
 ## Hard rules
 

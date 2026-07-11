@@ -9,6 +9,7 @@ type (
 	Decision = domain.Decision
 	Report   = domain.Report
 	Manifest = domain.Manifest
+	RunEvent = domain.RunEvent
 )
 
 const APIVersion = "lab.fastygo.dev/v1"

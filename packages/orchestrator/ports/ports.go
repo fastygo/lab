@@ -34,3 +34,14 @@ type Runner interface {
 type ArtifactStore interface {
 	SaveReport(ctx context.Context, report *domain.Report) error
 }
+
+// EventSink receives lab run progress events (Cycle F — dashboard / worker).
+// Implementations must be safe for sequential Emit from one Run; concurrency is optional.
+type EventSink interface {
+	Emit(ctx context.Context, ev domain.RunEvent) error
+}
+
+// NopSink discards events (CLI default).
+type NopSink struct{}
+
+func (NopSink) Emit(context.Context, domain.RunEvent) error { return nil }

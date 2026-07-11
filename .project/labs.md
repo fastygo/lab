@@ -9,6 +9,7 @@
 | `sec` | Attack surface + hardening decisions | D |
 | `quality` | Lighthouse ×4, HTML5, CSS, ARIA, SEO | B |
 | `static-web` | Vite/SPA targets via `static-web` adapter | E |
+| `saas` | Platform: job API + workers + events (not a Manifest pack) | F |
 
 ## Future (examples — not scheduled)
 

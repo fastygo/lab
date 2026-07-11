@@ -9,7 +9,7 @@ Lab intensity levels for local Docker.
 | `sec` | L2 | Security lab | WPScan, nuclei, target WP |
 | `quality` | L1/L2 | Perf/a11y/HTML | Lighthouse, axe, vnu |
 | `full` | L2 | Release | org + sec + quality |
-| `saas` | L3 | Cloud worker shape | same images, externalized config |
+| `saas` | L3 | Cloud worker shape | same images, externalized config; see [../vps/cycle-f-saas.md](../vps/cycle-f-saas.md) |
 
 ## Rules
 
