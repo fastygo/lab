@@ -11,11 +11,14 @@ spec:
   policy:
     pack: secure-baseline
   gates:
-    - id: S5-headers
+    # headers runner covers S1 recon probes + S5 security header scorecard
+    - id: S1-recon
       checks:
-        - id: headers-recon
+        - id: http-recon
           runner: headers
     - id: S2-wpscan
       checks:
         - id: wpscan-enum
           runner: wpscan
+          config:
+            dockerNetwork: host

@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-# Thin wrapper around wpscanteam/wpscan — maps text output to findings JSON.
+# Thin wrapper around wpscanteam/wpscan — maps JSON output to findings.
 TARGET="${LAB_TARGET_URL:-http://wordpress/}"
 GATE="${LAB_GATE_ID:-}"
 CHECK="${LAB_CHECK_ID:-}"
@@ -16,5 +16,68 @@ if [ -z "$RAW" ]; then
   exit 0
 fi
 
-# Pass through a minimal finding; full CVE mapping can be refined later.
-printf '%s\n' "{\"findings\":[{\"code\":\"sec.wpscan.completed\",\"gate\":\"$GATE\",\"check\":\"$CHECK\",\"severity\":\"info\",\"message\":\"wpscan enumeration completed\",\"target\":\"$TARGET\",\"evidence\":{\"bytes\":\"${#RAW}\"}}]}"
+# WPScan image is Ruby-based — parse with ruby.
+export RAW GATE CHECK TARGET
+ruby -e '
+require "json"
+raw = ENV["RAW"]
+gate = ENV["GATE"]
+check = ENV["CHECK"]
+target = ENV["TARGET"]
+findings = []
+begin
+  data = JSON.parse(raw)
+rescue => e
+  puts({findings:[{code:"sec.wpscan.exec_failed",gate:gate,check:check,severity:"high",message:"invalid wpscan JSON: #{e}",target:target}]}.to_json)
+  exit 0
+end
+
+users = data["users"] || {}
+if users.is_a?(Hash) && !users.empty?
+  findings << {
+    code: "sec.wpscan.users",
+    gate: gate, check: check,
+    severity: "medium",
+    message: "WPScan enumerated #{users.size} user(s)",
+    target: target,
+    evidence: {count: users.size.to_s},
+  }
+end
+
+vulns = []
+version = data["version"] || {}
+vulns.concat(version["vulnerabilities"] || []) if version.is_a?(Hash)
+%w[themes plugins].each do |key|
+  bag = data[key]
+  next unless bag.is_a?(Hash)
+  bag.each_value do |item|
+    next unless item.is_a?(Hash)
+    vulns.concat(item["vulnerabilities"] || [])
+  end
+end
+
+vulns.first(20).each do |v|
+  title = (v["title"] || v["id"] || "vulnerability").to_s[0, 240]
+  findings << {
+    code: "sec.wpscan.vuln",
+    gate: gate, check: check,
+    severity: "high",
+    message: title,
+    target: target,
+  }
+end
+
+findings << {
+  code: "sec.wpscan.completed",
+  gate: gate, check: check,
+  severity: "info",
+  message: "wpscan enumeration completed",
+  target: target,
+  evidence: {
+    bytes: raw.bytesize.to_s,
+    vulns: vulns.size.to_s,
+    users: (users.is_a?(Hash) ? users.size : 0).to_s,
+  },
+}
+puts({findings: findings}.to_json)
+'

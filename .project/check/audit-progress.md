@@ -177,21 +177,21 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | `readme.html` exposed | [x] | `sec.recon.readme` |
 | XML-RPC `system.listMethods` | [x] | `sec.recon.xmlrpc` |
-| Generator / version leak | [ ] | |
-| User enum (`?author=`, REST users) | [ ] | |
-| Registration open | [ ] | |
-| REST index surface | [ ] | |
-| Directory listing uploads/themes | [ ] | |
-| Sensitive files (`.env`, `wp-config.bak`, `debug.log`) | [ ] | |
-| wp-cron abuse note | [ ] | |
-| WPScan enum u,t,p (Docker) | [~] | wrapper emits `sec.wpscan.completed`, weak CVE map |
+| Generator / version leak | [x] | `sec.recon.generator` |
+| User enum (`?author=`, REST users) | [x] | `sec.recon.user_enum.author` / `.rest` |
+| Registration open | [x] | `sec.recon.registration` |
+| REST index surface | [x] | `sec.recon.rest_index` (ACCEPT — Gutenberg) |
+| Directory listing uploads/themes | [x] | `sec.recon.dir_listing.*` |
+| Sensitive files (`.env`, `wp-config.bak`, `debug.log`) | [x] | `sec.recon.sensitive.*` |
+| wp-cron abuse note | [x] | `sec.recon.wp_cron` |
+| WPScan enum u,t,p (Docker) | [x] | `sec.wpscan.users` / `.vuln` / `.completed` |
 
 ### S2 — Known CVE
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| WPScan API token CVE match | [ ] | |
-| Nuclei WP templates | [ ] | |
+| WPScan API token CVE match | [~] | maps `vulnerabilities` when token set (`WPSCAN_API_TOKEN`) |
+| Nuclei WP templates | [ ] | deferred |
 | `composer audit` on theme | [ ] | |
 
 ### S3 — Auth abuse
@@ -217,15 +217,15 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | `X-Content-Type-Options` | [x] | `sec.headers.nosniff` |
 | `X-Frame-Options` / CSP frame-ancestors | [x] | `sec.headers.clickjacking` |
 | `Referrer-Policy` | [x] | `sec.headers.referrer` |
-| CSP / HSTS / Permissions-Policy | [ ] | |
-| `DISALLOW_FILE_EDIT` probe | [ ] | needs WP admin/config |
+| CSP / HSTS / Permissions-Policy | [x] | `sec.headers.csp` / `.hsts` / `.permissions` |
+| `DISALLOW_FILE_EDIT` probe | [x] | `sec.config.file_edit` (endpoint present → SITE_DEFAULT_ON) |
 
 ### Sec infra
 
 | Check | Status | Notes |
 |-------|--------|-------|
 | Policy pack `secure-baseline` | [x] | |
-| Manifest `sec.lab.yaml` | [x] | |
+| Manifest `sec.lab.yaml` | [x] | S1 http-recon + S2 wpscan |
 | Compose profile `sec` | [x] | shares wordpress service |
 | Decision baskets documented | [x] | `.project/policy.md` |
 
@@ -249,9 +249,10 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. **Sec S1** — user enum + sensitive files + REST  
-2. Cycle E — static-web adapters  
-3. Org focus-trap / field INP — out of Quality scope  
+1. **Sec S3** — limited password spray + cookie flags (lab-only)  
+2. **Sec S4** — theme static dangerous patterns + XSS fixtures  
+3. **Sec S2** — `composer audit` + Nuclei (optional)  
+4. Cycle E — static-web adapters  
 
 ---
 
@@ -262,5 +263,5 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Org Gate 1 | 26 | 0 | 0 |
 | Org Gate 2–4 | 18 | 0 | 0 |
 | Quality Q1–Q6 | 28 | 0 | 0 |
-| Sec S1–S5 | 6 | 2 | ~15 |
+| Sec S1–S5 | 16 | 2 | ~8 |
 | Framework | 8 | 0 | 2 |

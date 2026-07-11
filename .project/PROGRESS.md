@@ -1,6 +1,6 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-11 (Lab `quality` checklist closed)  
+**Last updated:** 2026-07-11 (Lab `sec` S1 + S5 closed)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
 
@@ -12,8 +12,9 @@
 
 **→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-1. Sec S1 — user enum + sensitive files + REST  
-2. Cycle E — static-web adapters (React/Vue/Svelte)
+1. Sec S3 — auth abuse (lab-only spray + cookie flags)  
+2. Sec S4 — theme static/dynamic attack surface  
+3. Cycle E — static-web adapters (React/Vue/Svelte)
 
 ---
 
@@ -28,5 +29,5 @@
 | `quality` L0 + WP runtime (LH budgets/CWV, vnu soft, social, extras) | Done |
 | `wordpress` adapter stub | Done |
 | `org` Gate 1–4 | Done |
-| `sec` headers + wpscan | Done |
+| `sec` S1 recon + S5 headers (+ WPScan enum) | Done |
 | SaaS API | Not started |

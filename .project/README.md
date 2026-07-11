@@ -34,6 +34,7 @@ Read this first, then [PROGRESS.md](./PROGRESS.md), then the open cycle.
 | [labs/quality.md](./labs/quality.md) | Lighthouse / W3C / ARIA / SEO lab |
 | [check/](./check/) | Product checklists (theme / validate / security) |
 | [check/audit-progress.md](./check/audit-progress.md) | **Full check coverage** `[x]` / `[~]` / `[ ]` |
+| [vps/README.md](./vps/README.md) | **Clean VPS from source** — bootstrap runbook (EN) |
 
 ## Hard rules
 

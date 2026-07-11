@@ -33,7 +33,7 @@ func DefaultRunners() []orchestrator.Runner {
 	axeImage := envOr("LAB_AXE_IMAGE", "lab/axe:local")
 	tcImage := envOr("LAB_THEMECHECK_IMAGE", "lab/theme-check:local")
 	vnuImage := envOr("LAB_VNU_IMAGE", "lab/vnu:local")
-	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "wpscanteam/wpscan:latest")
+	wpscanImage := envOr("LAB_WPSCAN_IMAGE", "lab/wpscan:local")
 	noticeImage := envOr("LAB_NOTICE_HUNTER_IMAGE", "lab/notice-hunter:local")
 	keyboardImage := envOr("LAB_ORG_KEYBOARD_IMAGE", "lab/org-keyboard:local")
 	cssImage := envOr("LAB_CSS_LINT_IMAGE", "lab/css-lint:local")
