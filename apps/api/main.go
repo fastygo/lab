@@ -35,10 +35,15 @@ type server struct {
 }
 
 type createRunRequest struct {
-	Preset       string `json:"preset"`
-	ManifestPath string `json:"manifestPath"`
-	Lab          string `json:"lab"`
-	Sync         bool   `json:"sync"`
+	Preset       string            `json:"preset"`
+	ManifestPath string            `json:"manifestPath"`
+	Lab          string            `json:"lab"`
+	Sync         bool              `json:"sync"`
+	ThemeZip     string            `json:"themeZip"`
+	Root         string            `json:"root"`
+	BaseURL      string            `json:"baseUrl"`
+	Config       map[string]string `json:"config"`
+	CheckConfig  map[string]string `json:"checkConfig"`
 }
 
 func main() {
@@ -151,6 +156,13 @@ func (s *server) handleCreateRun(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	presets.ApplyBindings(m, presets.Bindings{
+		ThemeZip:    req.ThemeZip,
+		Root:        req.Root,
+		BaseURL:     req.BaseURL,
+		Config:      req.Config,
+		CheckConfig: req.CheckConfig,
+	})
 	raw, err := yaml.Marshal(m)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, "marshal manifest")

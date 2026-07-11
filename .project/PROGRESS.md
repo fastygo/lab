@@ -15,7 +15,7 @@
 **→ Cycle F — SaaS** (see [vps/cycle-f-saas.md](./vps/cycle-f-saas.md))
 
 1. F0 event layer — **done**  
-2. F1 API + worker MVP — **done** (memory + Postgres URL); next: quality E2E  
+2. F1 API + worker MVP — **done** (demo + quality E2E on VPS; bindings)  
 3. F2 org + sec job presets  
 4. F3 dashboard + F4 notify/schedules  
 
@@ -34,4 +34,4 @@
 | `org` Gate 1–4 | Done |
 | `sec` S1–S5 (SameSite, phpcs-security, semgrep) | Done |
 | `static-web` adapter (Cycle E) | Done |
-| SaaS API | **F1** — API + worker; Postgres via `DATABASE_URL` / memory fallback |
+| SaaS API | **F1 done** — quality E2E via API; themeZip/root bindings; Postgres URL |

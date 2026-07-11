@@ -129,17 +129,32 @@ Nop sink for CLI default; memory sink for tests; HTTP/DB sink for SaaS worker.
 | F1.4 | `GET /v1/runs/{id}/report` — Report JSON | [x] |
 | F1.5 | `GET /v1/runs` — list/filter | [x] |
 | F1.6 | Worker process: dequeue → `orchestrator.Run` → save report + events | [x] (in-process) |
-| F1.7 | Preset `quality` (static fixture) E2E on VPS worker | [ ] |
-| F1.8 | Artifact upload or `themeZip` / fixture path binding | [ ] |
+| F1.7 | Preset `quality` (static fixture) E2E on VPS worker | [x] (API job; fixture may `fail` on budgets) |
+| F1.8 | Artifact upload or `themeZip` / fixture path binding | [x] (`themeZip`/`root`/`baseUrl`/`config`/`checkConfig` on POST) |
 
-**Exit:** Dashboard-less curl can create a **demo** run and fetch a Report (quality when runners available).
+**Exit:** Dashboard-less curl can create a **demo** or **quality** run and fetch a Report.
 
 **VPS checklist (F1)**
 
-- [ ] Worker host has `make runners` images used by quality
-- [ ] API + worker + Postgres (compose or managed)
-- [ ] `POST` quality → `status=pass|fail` + report file in object store / DB
+- [x] Worker host has `make runners` images used by quality
+- [~] API + worker + Postgres (compose or managed) — API+worker verified; Postgres URI ready, memory used on smoke
+- [x] `POST` quality → `status=pass|fail|warn` + report in store
 
+### POST bindings (F1.8)
+
+```json
+{
+  "preset": "org",
+  "themeZip": "testdata/dist/latte.zip",
+  "baseUrl": "http://127.0.0.1:8080",
+  "root": "testdata/fixtures/quality-site",
+  "config": { "seedFile": "testdata/fixtures/org-seed.json" },
+  "checkConfig": { "dockerNetwork": "fastygo-lab_lab" },
+  "sync": false
+}
+```
+
+Paths are snapshotted into the run manifest; adapters resolve relative to `LAB_REPO_ROOT`.
 ---
 
 ### F2 — Three scenarios @ 100%
@@ -214,8 +229,8 @@ gates: S1✗ S2✓ S3✗ S4~
 1. EventSink in orchestrator          ← done
 2. runstore memory + apps/api + worker MVP ← done
 3. Postgres via DATABASE_URL / LAB_DATABASE_URL (pgx) ← done
-4. quality preset E2E on workers
-5. org + sec presets on VPS workers
+4. quality preset E2E on workers      ← done (VPS API)
+5. org + sec presets on VPS workers   ← next (F2)
 6. Dashboard F0 → timeline
 7. Schedules + Slack/Telegram
 ```

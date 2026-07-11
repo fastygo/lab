@@ -1,4 +1,4 @@
-.PHONY: test cli demo quality quality-wp static-web org sec api tidy runners org-up quality-up org-seed
+.PHONY: test cli demo quality quality-wp static-web org sec api tidy runners org-up quality-up org-seed saas-up
 
 test:
 	go test ./...
@@ -8,6 +8,10 @@ cli:
 
 api:
 	go run ./apps/api
+
+# Local Postgres for SaaS runstore (LAB_DATABASE_URL)
+saas-up:
+	docker compose -f deploy/compose/docker-compose.yml --profile saas up -d postgres
 
 demo:
 	go run ./apps/cli run -f testdata/manifests/demo.lab.yaml

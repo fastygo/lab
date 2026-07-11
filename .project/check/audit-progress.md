@@ -246,13 +246,13 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | WordPress adapter stub | [x] | baseUrl + themeZip + matrix |
 | `static-web` adapter (Cycle E) | [x] | dist SPA serve + optional vite preview |
 | wpfasty `theme:verify` / `theme:audit` client | [~] | `theme:audit` → Lab org `-o dist/*.audit.json`; full verify later |
-| SaaS API / workers | [~] | Cycle F — F1 + Postgres URI (`LAB_DATABASE_URL`); [.project/vps/cycle-f-saas.md](../vps/cycle-f-saas.md) |
+| SaaS API / workers | [~] | Cycle F — F1 done (quality API E2E); next F2 org/sec jobs; [cycle-f-saas.md](../vps/cycle-f-saas.md) |
 
 ---
 
 ## Suggested next (priority)
 
-1. Cycle F — F1.7 quality preset E2E (runners) + F1.1 Postgres when needed  
+1. Cycle F — **F2** org / sec (and quality-wp) as API jobs on VPS  
 2. Optional: deeper XSS Unit Test fixtures  
 
 ---
