@@ -5,7 +5,7 @@
  * Env: LAB_THEME_SLUG
  * Stdout: JSON array of {type,value} rows.
  */
-declare(strict_types=1);
+// Note: no declare(strict_types) — wp eval-file wraps the file and rejects it.
 
 $slug = getenv('LAB_THEME_SLUG') ?: '';
 if ($slug === '') {

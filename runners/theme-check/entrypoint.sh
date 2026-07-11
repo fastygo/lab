@@ -10,6 +10,12 @@ TARGET="${LAB_TARGET_URL:-http://wordpress}"
 ZIP="${LAB_THEME_ZIP:-}"
 SLUG=""
 
+# Match compose org profile DB (wp-config uses getenv_docker fallbacks).
+export WORDPRESS_DB_HOST="${WORDPRESS_DB_HOST:-db:3306}"
+export WORDPRESS_DB_USER="${WORDPRESS_DB_USER:-wp}"
+export WORDPRESS_DB_PASSWORD="${WORDPRESS_DB_PASSWORD:-wp}"
+export WORDPRESS_DB_NAME="${WORDPRESS_DB_NAME:-wordpress}"
+
 cd /var/www/html 2>/dev/null || true
 
 findings_error() {
@@ -51,8 +57,31 @@ fi
 
 # Install theme from zip if provided
 if [ -n "$ZIP" ] && [ -f "$ZIP" ]; then
-  wp theme install "$ZIP" --force --activate --allow-root 2>/dev/null || {
-    findings_error "org.themecheck.theme_install_failed" "high" "failed to install theme zip: $ZIP"
+  mkdir -p /var/www/html/wp-content/upgrade /var/www/html/wp-content/themes
+  # Prefer unzip+activate: wp theme install can reject some zip layouts.
+  TMPZIP="/tmp/lab-theme.zip"
+  cp "$ZIP" "$TMPZIP"
+  THEME_ROOT="$(php -r '
+    $z = new ZipArchive();
+    if ($z->open($argv[1]) !== true) { fwrite(STDERR, "open failed\n"); exit(1); }
+    $root = "";
+    for ($i = 0; $i < $z->numFiles; $i++) {
+      $n = str_replace("\\\\", "/", $z->getNameIndex($i));
+      if (preg_match("#^([^/]+)/style\\.css$#", $n, $m)) { echo $m[1]; exit(0); }
+    }
+    exit(2);
+  ' "$TMPZIP" 2>/dev/null || true)"
+  if [ -z "$THEME_ROOT" ]; then
+    findings_error "org.themecheck.theme_install_failed" "high" "zip has no <slug>/style.css (cannot detect theme root)"
+    exit 0
+  fi
+  rm -rf "/var/www/html/wp-content/themes/${THEME_ROOT}"
+  (cd /var/www/html/wp-content/themes && unzip -qo "$TMPZIP") || {
+    findings_error "org.themecheck.theme_install_failed" "high" "failed to unzip theme: $ZIP"
+    exit 0
+  }
+  wp theme activate "$THEME_ROOT" --allow-root >/dev/null 2>&1 || {
+    findings_error "org.themecheck.theme_install_failed" "high" "failed to activate theme: $THEME_ROOT"
     exit 0
   }
 elif [ -n "$ZIP" ]; then
@@ -66,11 +95,11 @@ if [ -z "$SLUG" ]; then
   exit 0
 fi
 
-wp plugin install theme-check --activate --force --allow-root 2>/dev/null || true
+wp plugin install theme-check --activate --force --allow-root >/dev/null 2>&1 || true
 
 export LAB_THEME_SLUG="$SLUG"
 
-# Prefer CLI if present; else eval-file headless API
+# Prefer CLI if present; else eval-file headless API (stderr discarded so stdout stays JSON)
 RAW="$(wp theme-check run "$SLUG" --format=json --allow-root 2>/dev/null || true)"
 if [ -z "$RAW" ]; then
   RAW="$(wp eval-file /runner/run-check.php --allow-root 2>/dev/null || true)"

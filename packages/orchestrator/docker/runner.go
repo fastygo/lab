@@ -108,6 +108,12 @@ func (r *Runner) Run(ctx context.Context, req ports.RunnerRequest) ([]domain.Fin
 	for _, e := range env {
 		args = append(args, "-e", e)
 	}
+	// Pass-through extra env from check config: env.FOO=bar → -e FOO=bar
+	for k, v := range req.Check.Config {
+		if strings.HasPrefix(k, "env.") {
+			args = append(args, "-e", strings.TrimPrefix(k, "env.")+"="+v)
+		}
+	}
 	args = append(args, image)
 
 	stdout, stderr, err := r.exec(ctx, r.docker, args, env)

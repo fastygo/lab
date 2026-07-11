@@ -110,7 +110,7 @@ func (r *Runner) probe(ctx context.Context, req ports.RunnerRequest, url string,
 	status := resp.StatusCode
 
 	// 404 URLs in matrix may intentionally expect 404
-	expect404 := strings.Contains(url, "does-not-exist") || strings.Contains(url, "lab-404")
+	expect404 := strings.Contains(url, "does-not-exist") || strings.Contains(url, "lab-404") || strings.Contains(url, "p=999999")
 	if expect404 {
 		if status == 404 || status == 200 {
 			// WP often soft-404s with 200 — warn

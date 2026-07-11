@@ -80,16 +80,18 @@ func (a *Adapter) Serve(_ context.Context) (domain.Target, error) {
 }
 
 func (a *Adapter) Matrix(_ context.Context) ([]string, error) {
+	// Query-string URLs work without Apache rewrite/.htaccess (compose org default).
+	// Pretty permalinks are covered after Unit Test import + rewrite flush (Gate 3+).
 	b := a.baseURL
 	return []string{
 		b + "/",
 		b + "/?p=1",
-		b + "/sample-page/",
-		b + "/category/uncategorized/",
-		b + "/tag/test/",
-		b + "/author/admin/",
+		b + "/?page_id=2",
+		b + "/?cat=1",
+		b + "/?tag=test",
+		b + "/?author=1",
 		b + "/?s=hello",
-		b + "/this-page-does-not-exist-lab-404/",
+		b + "/?p=999999&lab-404=1",
 	}, nil
 }
 

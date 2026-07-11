@@ -32,4 +32,4 @@ deploy/compose/data/
 
 # Space
 .manual
-.project/check
+# .project/check

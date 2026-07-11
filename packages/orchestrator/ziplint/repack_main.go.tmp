@@ -1,0 +1,21 @@
+package main
+import (
+  "archive/zip"; "fmt"; "io"; "os"; "path/filepath"
+)
+func main() {
+  src, dst := os.Args[1], os.Args[2]
+  out, err := os.Create(dst); if err != nil { panic(err) }
+  defer out.Close()
+  zw := zip.NewWriter(out); defer zw.Close()
+  n := 0
+  base := filepath.Dir(src)
+  filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+    if err != nil || info.IsDir() { return err }
+    rel, _ := filepath.Rel(base, path)
+    rel = filepath.ToSlash(rel)
+    w, err := zw.Create(rel); if err != nil { return err }
+    f, err := os.Open(path); if err != nil { return err }
+    _, err = io.Copy(w, f); f.Close(); n++; return err
+  })
+  fmt.Println("wrote", n, "to", dst)
+}
