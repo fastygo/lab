@@ -9,11 +9,13 @@ import (
 	"github.com/fastygo/lab/packages/adapters/static"
 	"github.com/fastygo/lab/packages/adapters/wordpress"
 	"github.com/fastygo/lab/packages/orchestrator"
+	"github.com/fastygo/lab/packages/orchestrator/authabuse"
 	"github.com/fastygo/lab/packages/orchestrator/docker"
 	"github.com/fastygo/lab/packages/orchestrator/headers"
 	"github.com/fastygo/lab/packages/orchestrator/httpmatrix"
 	"github.com/fastygo/lab/packages/orchestrator/seometa"
 	"github.com/fastygo/lab/packages/orchestrator/stub"
+	"github.com/fastygo/lab/packages/orchestrator/themesec"
 	"github.com/fastygo/lab/packages/orchestrator/ziplint"
 )
 
@@ -43,6 +45,8 @@ func DefaultRunners() []orchestrator.Runner {
 		stub.New(),
 		ziplint.New(),
 		headers.New(),
+		authabuse.New(),
+		themesec.New(),
 		httpmatrix.New(),
 		seometa.New(),
 		docker.New("lighthouse", lhImage),

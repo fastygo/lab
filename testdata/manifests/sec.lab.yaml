@@ -8,6 +8,7 @@ spec:
     id: wordpress
     config:
       baseUrl: http://127.0.0.1:8080
+      themeZip: testdata/dist/latte.zip
   policy:
     pack: secure-baseline
   gates:
@@ -22,3 +23,12 @@ spec:
           runner: wpscan
           config:
             dockerNetwork: host
+    - id: S3-auth
+      checks:
+        - id: auth-abuse
+          runner: auth-abuse
+          # Optional: password: "..." or export LAB_WP_PASSWORD for cookie-flag check
+    - id: S4-theme
+      checks:
+        - id: theme-sec
+          runner: theme-sec

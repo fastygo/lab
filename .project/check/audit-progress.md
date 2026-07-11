@@ -198,17 +198,18 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Limited password spray | [ ] | lab-only |
-| XML-RPC multicall flood detect | [ ] | |
-| Cookie flags after login | [ ] | |
+| Limited password spray | [x] | `sec.auth.login_no_rate_limit` / `.rate_limit_present` (fake wordlist only) |
+| XML-RPC multicall flood detect | [x] | `sec.auth.xmlrpc_multicall` |
+| Cookie flags after login | [x] | needs `LAB_WP_PASSWORD`; else `sec.auth.cookie_login_skipped` |
+| Host-header reset poison | [x] | `sec.auth.host_header_poison` / `.ok` |
 
 ### S4 — Theme attack surface
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Static dangerous PHP patterns (eval, unserialize, …) | [~] | partial via zip policy scan only |
-| Semgrep / phpcs-security | [ ] | |
-| Dynamic XSS fixtures | [ ] | |
+| Static dangerous PHP patterns (eval, unserialize, …) | [x] | runner `theme-sec` → `sec.theme.*` |
+| Semgrep / phpcs-security | [ ] | optional later |
+| Dynamic XSS fixtures | [~] | reflected search `/?s=<script>` probe |
 
 ### S5 — Headers / config
 
@@ -225,7 +226,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Check | Status | Notes |
 |-------|--------|-------|
 | Policy pack `secure-baseline` | [x] | |
-| Manifest `sec.lab.yaml` | [x] | S1 http-recon + S2 wpscan |
+| Manifest `sec.lab.yaml` | [x] | S1 headers + S2 wpscan + S3 auth-abuse + S4 theme-sec |
 | Compose profile `sec` | [x] | shares wordpress service |
 | Decision baskets documented | [x] | `.project/policy.md` |
 
@@ -249,10 +250,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. **Sec S3** — limited password spray + cookie flags (lab-only)  
-2. **Sec S4** — theme static dangerous patterns + XSS fixtures  
-3. **Sec S2** — `composer audit` + Nuclei (optional)  
-4. Cycle E — static-web adapters  
+1. **Sec S2** — `composer audit` on theme + optional Nuclei  
+2. Cookie SameSite assert (raw Set-Cookie) + privilege/CSRF if theme grows endpoints  
+3. Cycle E — static-web adapters  
 
 ---
 
@@ -263,5 +263,5 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Org Gate 1 | 26 | 0 | 0 |
 | Org Gate 2–4 | 18 | 0 | 0 |
 | Quality Q1–Q6 | 28 | 0 | 0 |
-| Sec S1–S5 | 16 | 2 | ~8 |
+| Sec S1–S5 | 22 | 2 | ~4 |
 | Framework | 8 | 0 | 2 |

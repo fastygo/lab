@@ -15,6 +15,9 @@ A **runner** executes one tool (or a small tool family) and emits **findings** J
 | `theme-check` | Docker | `runners/theme-check` → `lab/theme-check:local` |
 | `vnu` | Docker | `runners/vnu` → `lab/vnu:local` |
 | `wpscan` | Docker | `runners/wpscan` / `wpscanteam/wpscan` |
+| `headers` | In-process | S1 recon + S5 headers |
+| `auth-abuse` | In-process | S3 spray / xmlrpc multicall / cookies |
+| `theme-sec` | In-process | S4 zip danger patterns + search XSS |
 | `notice-hunter` | Docker | `runners/notice-hunter` → `lab/notice-hunter:local` |
 | `org-keyboard` | Docker | `runners/org-keyboard` → `lab/org-keyboard:local` |
 | `css-lint` | Docker | `runners/css-lint` → `lab/css-lint:local` |
