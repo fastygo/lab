@@ -229,7 +229,7 @@ Lighthouse отработал, но набрал 0 баллов. Скорее в
 | 4 | **Quality Q3–Q6** — css-lint, seo-meta, quality-extras + `-o` audit.json | `[x]` |
 | 5 | **Quality** — checklist closed (budgets, WP target, soft vnu, social) | `[x]` |
 | 6 | **Sec S1+** — user enum, sensitive files, REST, CVE API | в основном `[ ]` |
-| 7 | **Cycle E** — static-web adapters; **F** — SaaS | не начато |
+| 7 | **Cycle E** — static-web adapters; **F** — SaaS | E done (`static-web`); F not started |
 | 8 | wpfasty `theme:verify` client | `[ ]` |
 
 Уже закрыто в Lab: Gate 1 zip-lint, Gate 2 Theme Check (код), Gate 3 HTTP smoke (код), Q1/Q2/Q4 runners, sec headers + wpscan scaffold.

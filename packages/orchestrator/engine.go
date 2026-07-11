@@ -113,5 +113,5 @@ func (e *Engine) Run(ctx context.Context, m *domain.Manifest) (*domain.Report, e
 
 // KnownLabs returns product lab ids (also exposed via packages/registry).
 func KnownLabs() []string {
-	return []string{"demo", "quality", "org", "sec"}
+	return []string{"demo", "quality", "org", "sec", "static-web"}
 }

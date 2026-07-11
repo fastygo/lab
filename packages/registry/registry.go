@@ -7,6 +7,7 @@ import (
 
 	"github.com/fastygo/lab/packages/adapters/noop"
 	"github.com/fastygo/lab/packages/adapters/static"
+	"github.com/fastygo/lab/packages/adapters/staticweb"
 	"github.com/fastygo/lab/packages/adapters/wordpress"
 	"github.com/fastygo/lab/packages/orchestrator"
 	"github.com/fastygo/lab/packages/orchestrator/authabuse"
@@ -25,6 +26,7 @@ func DefaultAdapters(repoRoot string) []orchestrator.TargetAdapter {
 	return []orchestrator.TargetAdapter{
 		noop.New(),
 		static.New(fixture),
+		staticweb.New(repoRoot),
 		wordpress.New(repoRoot),
 	}
 }
@@ -67,7 +69,7 @@ func DefaultRunners() []orchestrator.Runner {
 
 // KnownLabs lists product lab ids.
 func KnownLabs() []string {
-	return []string{"demo", "quality", "org", "sec"}
+	return []string{"demo", "quality", "org", "sec", "static-web"}
 }
 
 // FindRepoRoot walks up from cwd looking for go.mod.

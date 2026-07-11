@@ -1,0 +1,37 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: quality-staticweb
+spec:
+  lab: static-web
+  adapter:
+    id: static-web
+    config:
+      root: testdata/fixtures/static-web-app
+      mode: dist
+      dist: dist
+      framework: vite
+      spa: "true"
+      matrix: "/,/about"
+  policy:
+    pack: lightspeed
+  gates:
+    - id: Q5-seo
+      checks:
+        - id: seo-meta
+          runner: seo-meta
+          config:
+            seoSocial: "true"
+    - id: Q2-vnu
+      checks:
+        - id: vnu-html
+          runner: vnu
+          config:
+            softMode: "true"
+            dockerNetwork: host
+    - id: Q4-axe
+      checks:
+        - id: axe-wcag
+          runner: axe
+          config:
+            dockerNetwork: host

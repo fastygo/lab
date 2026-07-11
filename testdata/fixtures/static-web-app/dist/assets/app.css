@@ -1,0 +1,42 @@
+:root {
+  color-scheme: light;
+  --bg: #f3efe6;
+  --ink: #1c1915;
+  --accent: #0f6b5c;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 10% 0%, #d9efe8 0%, transparent 42%),
+    linear-gradient(180deg, var(--bg), #ebe4d6);
+  color: var(--ink);
+  min-height: 100vh;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1.25rem 1.5rem;
+}
+.brand {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+nav a {
+  color: var(--accent);
+  margin-left: 1rem;
+  text-decoration: none;
+}
+nav a:hover { text-decoration: underline; }
+main {
+  max-width: 40rem;
+  padding: 2rem 1.5rem 4rem;
+}
+h1 {
+  font-size: 2.4rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}

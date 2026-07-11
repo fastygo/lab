@@ -1,0 +1,10 @@
+{
+  "name": "lab-static-web-fixture",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Prebuilt dist/ only — npm scripts optional for local vite preview demos",
+  "scripts": {
+    "build": "node -e \"console.log('fixture ships prebuilt dist/; no build step')\"",
+    "preview": "npx --yes serve dist -l {port}"
+  }
+}

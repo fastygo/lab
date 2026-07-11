@@ -50,7 +50,7 @@ Usage:
   lab labs
   lab run -f <manifest.yaml> [-o|--out <report.json>]
 
-Labs: demo, quality, org, sec
+Labs: demo, quality, org, sec, static-web
 
 `)
 }

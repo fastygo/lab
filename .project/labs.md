@@ -8,6 +8,7 @@
 | `org` | WordPress.org theme readiness | C |
 | `sec` | Attack surface + hardening decisions | D |
 | `quality` | Lighthouse ×4, HTML5, CSS, ARIA, SEO | B |
+| `static-web` | Vite/SPA targets via `static-web` adapter | E |
 
 ## Future (examples — not scheduled)
 

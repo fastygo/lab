@@ -162,6 +162,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Check | Status | Notes |
 |-------|--------|-------|
 | Static fixture adapter | [x] | `adapters/static` + `quality-site` |
+| `static-web` adapter (Vite/SPA) | [x] | Cycle E; `quality-staticweb.lab.yaml` |
 | Compose `quality` + nginx fixture | [x] | profile `quality` |
 | Policy pack `lightspeed` | [x] | bytes / soft vnu / social |
 | Manifest `quality.lab.yaml` (Q1–Q6) | [x] | |
@@ -240,9 +241,10 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Policy engine + packs | [x] | default, lightspeed, wordpress-org, secure-baseline |
 | Orchestrator + CLI `lab` | [x] | v0.2.0 |
 | Docker runner port + unavailable finding | [x] | zip mount + compose network/volume for theme-check |
-| Registry adapters/runners | [x] | includes `vnu` |
+| Registry adapters/runners | [x] | includes `vnu`, `composer-audit`, `nuclei` |
 | Demo lab | [x] | |
 | WordPress adapter stub | [x] | baseUrl + themeZip + matrix |
+| `static-web` adapter (Cycle E) | [x] | dist SPA serve + optional vite preview |
 | wpfasty `theme:verify` / `theme:audit` client | [~] | `theme:audit` → Lab org `-o dist/*.audit.json`; full verify later |
 | SaaS API / workers | [ ] | Cycle F |
 
@@ -250,9 +252,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 
 ## Suggested next (priority)
 
-1. Cycle E — static-web adapters  
-2. SameSite cookie assert (raw Set-Cookie) + Semgrep/PHPCS-security  
-3. Deeper XSS fixtures (title/content) beyond search probe  
+1. SameSite cookie assert (raw Set-Cookie) + Semgrep/PHPCS-security  
+2. Deeper XSS fixtures (title/content) beyond search probe  
+3. Cycle F — SaaS API / workers  
 
 ---
 
@@ -264,4 +266,4 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Org Gate 2–4 | 18 | 0 | 0 |
 | Quality Q1–Q6 | 28 | 0 | 0 |
 | Sec S1–S5 | 25 | 1 | ~2 |
-| Framework | 8 | 0 | 2 |
+| Framework | 9 | 0 | 1 |

@@ -1,6 +1,6 @@
 # FastyGo Lab — Progress
 
-**Last updated:** 2026-07-11 (Lab `sec` S2 composer-audit + nuclei)  
+**Last updated:** 2026-07-11 (Cycle E `static-web` adapter)  
 **Module:** `github.com/fastygo/lab`  
 **CLI:** `lab` v0.2.0
 
@@ -12,8 +12,8 @@
 
 **→ Next product checks** (see [check/audit-progress.md](./check/audit-progress.md) “Suggested next”)
 
-1. Cycle E — static-web adapters (React/Vue/Svelte)  
-2. SameSite cookie assert + Semgrep/PHPCS-security  
+1. SameSite cookie assert + Semgrep/PHPCS-security  
+2. Cycle F — SaaS API / workers  
 
 ---
 
@@ -29,4 +29,5 @@
 | `wordpress` adapter stub | Done |
 | `org` Gate 1–4 | Done |
 | `sec` S1–S5 (incl. S2 composer + nuclei) | Done |
+| `static-web` adapter (Cycle E) | Done |
 | SaaS API | Not started |

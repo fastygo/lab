@@ -30,7 +30,8 @@ Gates declare required capabilities. Orchestrator selects adapters that satisfy 
 |---------|------|
 | `noop` | Fixture URL + static matrix (Cycle A demo) |
 | `wordpress` | Pack/install theme zip in WP (Cycle B+) |
-| `static-web` | Vite/Node preview for React/Vue/Svelte (Cycle E) |
+| `static` | Local HTML directory (quality L0 fixture) |
+| `static-web` | Vite/React/Vue/Svelte dist or preview (Cycle E) |
 | `go-http` | Serve Go binary (later) |
 | `php-app` | Generic PHP app (later) |
 
