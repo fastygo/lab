@@ -43,6 +43,42 @@ func TestSEOMetaHappyPath(t *testing.T) {
 	}
 }
 
+func TestSEOMetaSocial(t *testing.T) {
+	t.Parallel()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<!DOCTYPE html><html><head>
+<title>Hello</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:title" content="Hello">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@type":"WebSite","name":"Hello"}</script>
+</head><body><h1>Hi</h1></body></html>`))
+	}))
+	defer srv.Close()
+
+	r := New()
+	findings, err := r.Run(context.Background(), ports.RunnerRequest{
+		Gate:  "Q5-seo",
+		Check: domain.Check{ID: "seo", Runner: "seo-meta", Config: map[string]string{"seoSocial": "true"}},
+		Target: domain.Target{BaseURL: srv.URL},
+		URLs:   []string{srv.URL + "/"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	codes := map[string]bool{}
+	for _, f := range findings {
+		codes[f.Code] = true
+	}
+	for _, want := range []string{"quality.seo.og_ok", "quality.seo.twitter_ok", "quality.seo.jsonld_ok", "quality.seo.ok"} {
+		if !codes[want] {
+			t.Fatalf("missing %s in %#v", want, codes)
+		}
+	}
+}
+
 func TestSEOMetaMissingTitle(t *testing.T) {
 	t.Parallel()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

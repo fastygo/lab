@@ -2,6 +2,7 @@ package seometa
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -156,10 +157,30 @@ func (r *Runner) checkURL(ctx context.Context, req ports.RunnerRequest, url stri
 		} else {
 			add("quality.seo.og_ok", domain.SeverityInfo, "og:title present", map[string]string{"og:title": meta.OGTitle})
 		}
-		if meta.JSONLDCount == 0 {
-			add("quality.seo.jsonld_missing", domain.SeverityInfo, "no JSON-LD blocks", nil)
+		if meta.OGType == "" {
+			add("quality.seo.og_type_missing", domain.SeverityMedium, "og:type missing", nil)
 		} else {
-			add("quality.seo.jsonld_ok", domain.SeverityInfo, fmt.Sprintf("%d JSON-LD block(s)", meta.JSONLDCount), map[string]string{"count": strconv.Itoa(meta.JSONLDCount)})
+			add("quality.seo.og_type_ok", domain.SeverityInfo, "og:type present", map[string]string{"og:type": meta.OGType})
+		}
+		if meta.OGURL == "" {
+			add("quality.seo.og_url_missing", domain.SeverityInfo, "og:url missing (soft)", nil)
+		} else {
+			add("quality.seo.og_url_ok", domain.SeverityInfo, "og:url present", nil)
+		}
+		if meta.TwitterCard == "" {
+			add("quality.seo.twitter_missing", domain.SeverityMedium, "twitter:card missing", nil)
+		} else {
+			add("quality.seo.twitter_ok", domain.SeverityInfo, "twitter:card present", map[string]string{"twitter:card": meta.TwitterCard})
+		}
+		if meta.JSONLDCount == 0 {
+			add("quality.seo.jsonld_missing", domain.SeverityMedium, "no JSON-LD blocks", nil)
+		} else if meta.JSONLDInvalid > 0 {
+			add("quality.seo.jsonld_invalid", domain.SeverityMedium, fmt.Sprintf("%d invalid JSON-LD block(s)", meta.JSONLDInvalid), map[string]string{
+				"invalid": strconv.Itoa(meta.JSONLDInvalid),
+				"total":   strconv.Itoa(meta.JSONLDCount),
+			})
+		} else {
+			add("quality.seo.jsonld_ok", domain.SeverityInfo, fmt.Sprintf("%d valid JSON-LD block(s)", meta.JSONLDCount), map[string]string{"count": strconv.Itoa(meta.JSONLDCount)})
 		}
 	}
 
@@ -167,12 +188,16 @@ func (r *Runner) checkURL(ctx context.Context, req ports.RunnerRequest, url stri
 }
 
 type pageMeta struct {
-	Title       string
-	Description string
-	HasViewport bool
-	H1Count     int
-	OGTitle     string
-	JSONLDCount int
+	Title          string
+	Description    string
+	HasViewport    bool
+	H1Count        int
+	OGTitle        string
+	OGType         string
+	OGURL          string
+	TwitterCard    string
+	JSONLDCount    int
+	JSONLDInvalid  int
 }
 
 func parseMeta(src string) (pageMeta, error) {
@@ -197,14 +222,32 @@ func parseMeta(src string) (pageMeta, error) {
 				if strings.EqualFold(name, "description") {
 					m.Description = content
 				}
+				if strings.EqualFold(name, "twitter:card") {
+					m.TwitterCard = content
+				}
 				if strings.EqualFold(prop, "og:title") {
 					m.OGTitle = content
+				}
+				if strings.EqualFold(prop, "og:type") {
+					m.OGType = content
+				}
+				if strings.EqualFold(prop, "og:url") {
+					m.OGURL = content
 				}
 			case "h1":
 				m.H1Count++
 			case "script":
 				if strings.EqualFold(attr(n, "type"), "application/ld+json") {
 					m.JSONLDCount++
+					raw := strings.TrimSpace(textContent(n))
+					if raw == "" {
+						m.JSONLDInvalid++
+					} else {
+						var v any
+						if err := json.Unmarshal([]byte(raw), &v); err != nil {
+							m.JSONLDInvalid++
+						}
+					}
 				}
 			}
 		}

@@ -50,6 +50,17 @@ func packRules(pack string) []Rule {
 			{Code: "quality.extras.summary", Basket: domain.BasketAccept, Rationale: "Quality extras summary"},
 			{Code: "quality.viewport.ok", Basket: domain.BasketAccept, Rationale: "Viewport rendered"},
 			{Code: "quality.console.ok", Basket: domain.BasketAccept, Rationale: "Console clean"},
+			{Code: "quality.motion.ok", Basket: domain.BasketAccept, Rationale: "Reduced motion OK"},
+			{Code: "quality.links.ok", Basket: domain.BasketAccept, Rationale: "Broken-link crawl clean"},
+			{Code: "quality.links.summary", Basket: domain.BasketAccept, Rationale: "Broken-link summary"},
+			{Code: "quality.links.none", Basket: domain.BasketAccept, Rationale: "No same-origin links"},
+			{Code: "quality.lighthouse.summary", Basket: domain.BasketAccept, Rationale: "Lighthouse median summary"},
+			{Code: "quality.vnu.soft_error", Basket: domain.BasketBudget, Rationale: "Unit Test / content HTML soft mode"},
+			{Code: "quality.seo.og_ok", Basket: domain.BasketAccept, Rationale: "og:title present"},
+			{Code: "quality.seo.og_type_ok", Basket: domain.BasketAccept, Rationale: "og:type present"},
+			{Code: "quality.seo.og_url_ok", Basket: domain.BasketAccept, Rationale: "og:url present"},
+			{Code: "quality.seo.twitter_ok", Basket: domain.BasketAccept, Rationale: "twitter:card present"},
+			{Code: "quality.seo.jsonld_ok", Basket: domain.BasketAccept, Rationale: "JSON-LD valid"},
 			{Code: "runner.docker.unavailable", Basket: domain.BasketAccept, Rationale: "Docker missing in unit/dev; re-run with Docker for real scores"},
 		}...)
 	case "wordpress-org":
@@ -162,6 +173,13 @@ func heuristic(pack, code string) *domain.Decision {
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Axe violation"}
 	case pack == "lightspeed" && (code == "quality.vnu.error" || code == "quality.vnu.fetch_failed" || code == "quality.vnu.exec_failed" || code == "quality.vnu.parse_failed"):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "HTML validation error"}
+	case pack == "lightspeed" && code == "quality.vnu.soft_error":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "vnu softMode — content HTML"}
+	case pack == "lightspeed" && (code == "quality.seo.og_title_missing" || code == "quality.seo.og_type_missing" ||
+		code == "quality.seo.twitter_missing" || code == "quality.seo.jsonld_missing" || code == "quality.seo.jsonld_invalid"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Social/JSON-LD profile gap"}
+	case pack == "lightspeed" && hasPrefix(code, "quality.lighthouse.bytes_"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Resource byte budget"}
 	case pack == "lightspeed" && (code == "quality.css.parse_error" || code == "quality.css.forbidden" || code == "quality.css.exec_failed"):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "CSS parse / forbidden rule"}
 	case pack == "lightspeed" && code == "quality.css.no_files":
@@ -172,8 +190,18 @@ func heuristic(pack, code string) *domain.Decision {
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "h1 count — review"}
 	case pack == "lightspeed" && (hasPrefix(code, "quality.viewport.") && code != "quality.viewport.ok" ||
 		hasPrefix(code, "quality.console.") && code != "quality.console.ok" ||
-		code == "quality.extras.exec_failed"):
-		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Viewport / console failure"}
+		code == "quality.extras.exec_failed" ||
+		code == "quality.motion.unreduced" || code == "quality.motion.failed" ||
+		code == "quality.links.broken" || code == "quality.links.fetch_failed" || code == "quality.links.failed"):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Viewport / console / motion / links failure"}
+	case pack == "lightspeed" && code == "quality.motion.emulation_failed":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "Reduced-motion emulation issue"}
+	case pack == "lightspeed" && (code == "quality.lighthouse.lcp" || code == "quality.lighthouse.cls" ||
+		code == "quality.lighthouse.tbt" || code == "quality.lighthouse.fcp" ||
+		hasSuffix(code, ".missing") && hasPrefix(code, "quality.lighthouse.")):
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketBudget, Rationale: "CWV budget — tune theme/site"}
+	case pack == "lightspeed" && code == "quality.lighthouse.exec_failed":
+		return &domain.Decision{FindingCode: code, Basket: domain.BasketFixTheme, Rationale: "Lighthouse execution failed"}
 	case pack == "secure-baseline" && hasPrefix(code, "sec.recon."):
 		return &domain.Decision{FindingCode: code, Basket: domain.BasketSiteDefaultOff, Rationale: "Reduce attack surface"}
 	}

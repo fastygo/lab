@@ -1,0 +1,77 @@
+apiVersion: lab.fastygo.dev/v1
+kind: LabManifest
+metadata:
+  name: quality-wp
+spec:
+  lab: quality
+  adapter:
+    id: wordpress
+    config:
+      # Logged-out prod-like WP (compose org profile). No admin session.
+      baseUrl: http://127.0.0.1:8080
+      themeZip: testdata/dist/latte.zip
+      seedFile: testdata/fixtures/org-seed.json
+  policy:
+    pack: lightspeed
+  gates:
+    - id: Q1-lighthouse
+      checks:
+        - id: lighthouse-mobile
+          runner: lighthouse
+          config:
+            runs: "3"
+            dockerNetwork: host
+            internalUrl: http://127.0.0.1:8080
+            perfFail: "0.5"
+            perfWarn: "0.7"
+            a11yFail: "0.8"
+            a11yWarn: "0.9"
+            lcpFail: "4"
+            lcpWarn: "2.5"
+            clsFail: "0.25"
+            clsWarn: "0.1"
+            tbtFail: "600"
+            tbtWarn: "300"
+            # Theme zip CSS/JS can be large — budgets as BUDGET, not hard theme fail defaults
+            totalByteFail: "2500000"
+            totalByteWarn: "1000000"
+            scriptByteFail: "500000"
+            scriptByteWarn: "200000"
+            styleByteFail: "800000"
+            styleByteWarn: "300000"
+    - id: Q2-vnu
+      checks:
+        - id: vnu-html
+          runner: vnu
+          config:
+            dockerNetwork: host
+            internalUrl: http://127.0.0.1:8080
+            # Unit Test / WP content HTML — demote to soft errors
+            softMode: "true"
+    - id: Q3-css
+      checks:
+        - id: css-lint
+          runner: css-lint
+          config:
+            themeZip: testdata/dist/latte.zip
+    - id: Q4-axe
+      checks:
+        - id: axe-wcag
+          runner: axe
+          config:
+            dockerNetwork: host
+            internalUrl: http://127.0.0.1:8080
+    - id: Q5-seo
+      checks:
+        - id: seo-meta
+          runner: seo-meta
+          config:
+            # Theme does not ship SEO plugin — social optional off for WP default
+            seoSocial: "false"
+    - id: Q6-extras
+      checks:
+        - id: quality-extras
+          runner: quality-extras
+          config:
+            dockerNetwork: host
+            internalUrl: http://127.0.0.1:8080

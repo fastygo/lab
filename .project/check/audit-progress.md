@@ -4,7 +4,7 @@
 Update this file when a check lands in code. Cycle roadmap stays in [../PROGRESS.md](../PROGRESS.md).
 
 **Legend:** `[x]` implemented · `[~]` partial / scaffold · `[ ]` not started  
-**Last audited:** 2026-07-11 (Quality Q3–Q6 + audit.json emit)
+**Last audited:** 2026-07-11 (Quality checklist closed: budgets + WP + soft vnu + social)
 
 ---
 
@@ -110,10 +110,10 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Docker runner image + entrypoint | [x] | `runners/lighthouse` |
 | Mobile categories Perf / A11y / BP / SEO | [x] | findings `quality.lighthouse.*` |
 | Thresholds fail/warn from config | [x] | |
-| Median of 3 runs | [ ] | single run today |
-| Resource byte budgets | [ ] | |
-| Core Web Vitals asserts (LCP/CLS/INP) | [ ] | inside LH report unused |
-| Target = WP theme (not only static fixture) | [ ] | L0 uses `static` adapter |
+| Median of 3 runs | [x] | config `runs` (default 3) |
+| Resource byte budgets | [x] | total/script/style transfer medians |
+| Core Web Vitals asserts (LCP/CLS/INP) | [x] | LCP/CLS/TBT/FCP; TBT = INP proxy (field INP out of scope) |
+| Target = WP theme (not only static fixture) | [x] | `quality-wp.lab.yaml` → wordpress `:8080` |
 
 ### Q2 — W3C HTML5 (vnu)
 
@@ -121,7 +121,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | vnu Docker runner | [x] | `runners/vnu` → `lab/vnu:local`; registry `vnu` |
 | 0 errors on chrome/controlled URLs | [x] | findings `quality.vnu.*`; gate in `quality.lab.yaml` |
-| Soft mode for Unit Test content | [ ] | |
+| Soft mode for Unit Test content | [x] | `softMode=true` → `quality.vnu.soft_error` / BUDGET |
 
 ### Q3 — CSS
 
@@ -137,7 +137,7 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 | Docker axe + Playwright | [x] | `runners/axe` (uses `browser.newContext`) |
 | WCAG 2.2 AA tags | [x] | |
 | Fail critical/serious | [x] | `quality.axe.*` |
-| Latte chrome-specific asserts (sheet trap, etc.) | [x] | keyboard chrome via Org C4 `org-keyboard`; focus-trap still deferred |
+| Latte chrome-specific asserts (sheet trap, etc.) | [x] | keyboard via Org C4; focus-trap stays Org/tag deferred |
 
 ### Q5 — SEO meta / graph
 
@@ -145,8 +145,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | title / viewport asserts | [x] | `seo-meta` runner |
 | meta description | [x] | soft info if missing |
-| Open Graph / Twitter cards (optional profile) | [~] | gated by `seoSocial=true` |
-| JSON-LD parse (optional) | [~] | count only when `seoSocial=true` |
+| Open Graph / Twitter cards (optional profile) | [x] | `seoSocial=true` on static; WP default off |
+| JSON-LD parse (optional) | [x] | parse + validate when `seoSocial=true` |
 
 ### Q6 — Modern extras
 
@@ -154,8 +154,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | Viewports 360/768/1280 | [x] | `runners/quality-extras` |
 | Console clean | [x] | pageerror + console.error |
-| `prefers-reduced-motion` | [ ] | deferred |
-| Broken-link crawl | [ ] | deferred |
+| `prefers-reduced-motion` | [x] | emulate reduce; fail infinite anim |
+| Broken-link crawl | [x] | same-origin `a[href]` via Playwright request |
 
 ### Quality infra
 
@@ -163,9 +163,9 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |-------|--------|-------|
 | Static fixture adapter | [x] | `adapters/static` + `quality-site` |
 | Compose `quality` + nginx fixture | [x] | profile `quality` |
-| Policy pack `lightspeed` | [x] | includes vnu/css/seo/extras |
+| Policy pack `lightspeed` | [x] | bytes / soft vnu / social |
 | Manifest `quality.lab.yaml` (Q1–Q6) | [x] | |
-| Logged-out prod-like WP target | [ ] | |
+| Logged-out prod-like WP target | [x] | `quality-wp.lab.yaml` |
 
 ---
 
@@ -250,9 +250,8 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 ## Suggested next (priority)
 
 1. **Sec S1** — user enum + sensitive files + REST  
-2. **Q1 deepen** — median-of-3 / CWV / WP target for quality  
-3. **Q6 deferred** — prefers-reduced-motion + broken-link crawl  
-4. Cycle E — static-web adapters  
+2. Cycle E — static-web adapters  
+3. Org focus-trap / field INP — out of Quality scope  
 
 ---
 
@@ -262,6 +261,6 @@ go run ./apps/cli run -f testdata/manifests/sec.lab.yaml
 |------|------|---------|------|
 | Org Gate 1 | 26 | 0 | 0 |
 | Org Gate 2–4 | 18 | 0 | 0 |
-| Quality Q1–Q6 | 20 | 2 | ~6 |
+| Quality Q1–Q6 | 28 | 0 | 0 |
 | Sec S1–S5 | 6 | 2 | ~15 |
 | Framework | 8 | 0 | 2 |

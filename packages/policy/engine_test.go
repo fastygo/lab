@@ -49,6 +49,38 @@ func TestEngineMapLightspeed(t *testing.T) {
 	}
 }
 
+func TestEngineMapLightspeedMotionLinksCWV(t *testing.T) {
+	t.Parallel()
+	e := NewEngine("lightspeed")
+	decisions := e.Map([]domain.Finding{
+		{Code: "quality.motion.ok", Severity: domain.SeverityInfo},
+		{Code: "quality.motion.unreduced", Severity: domain.SeverityHigh},
+		{Code: "quality.links.broken", Severity: domain.SeverityHigh},
+		{Code: "quality.links.ok", Severity: domain.SeverityInfo},
+		{Code: "quality.lighthouse.lcp", Severity: domain.SeverityInfo},
+		{Code: "quality.lighthouse.exec_failed", Severity: domain.SeverityHigh},
+	})
+	by := map[string]domain.Decision{}
+	for _, d := range decisions {
+		by[d.FindingCode] = d
+	}
+	if by["quality.motion.ok"].Basket != domain.BasketAccept {
+		t.Fatalf("%+v", by["quality.motion.ok"])
+	}
+	if by["quality.motion.unreduced"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.motion.unreduced"])
+	}
+	if by["quality.links.broken"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.links.broken"])
+	}
+	if by["quality.lighthouse.lcp"].Basket != domain.BasketBudget {
+		t.Fatalf("%+v", by["quality.lighthouse.lcp"])
+	}
+	if by["quality.lighthouse.exec_failed"].Basket != domain.BasketFixTheme {
+		t.Fatalf("%+v", by["quality.lighthouse.exec_failed"])
+	}
+}
+
 func TestEngineMapLightspeedQ356(t *testing.T) {
 	t.Parallel()
 	e := NewEngine("lightspeed")

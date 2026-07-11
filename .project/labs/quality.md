@@ -2,7 +2,7 @@
 
 **Id:** `quality`  
 **Cycle:** B  
-**Adapters:** any with `http` + `html` (`wordpress`, `static-web`, …)
+**Adapters:** `static` (fixture) + `wordpress` (logged-out runtime)
 
 ## Purpose
 
@@ -12,30 +12,32 @@ Validate modern site quality: Lighthouse (4×100), W3C HTML5, CSS hygiene, ARIA/
 
 | Gate | Tooling | Default thresholds (theme) |
 |------|---------|----------------------------|
-| Q1 Lighthouse | LHCI mobile median | Perf ≥90 (fail &lt;70), A11y ≥95, BP ≥95, SEO ≥90 |
-| Q2 HTML5 | vnu | 0 errors on chrome/controlled URLs |
+| Q1 Lighthouse | median×3 + CWV + byte budgets | Perf / A11y / BP / SEO + LCP/CLS/TBT + bytes |
+| Q2 HTML5 | vnu | hard on fixture; `softMode` on WP Unit Test content |
 | Q3 CSS | stylelint / parse | 0 fatal parse errors |
 | Q4 ARIA/WCAG | axe WCAG 2.2 AA | 0 critical/serious |
-| Q5 SEO graph | seo-meta runner | title/viewport/h1; OG if `seoSocial=true` |
-| Q6 Modern extras | Playwright viewports + console | 360/768/1280 + console clean |
+| Q5 SEO graph | seo-meta | title/viewport/h1; OG/Twitter/JSON-LD if `seoSocial=true` |
+| Q6 Modern extras | Playwright | viewports, console, reduced-motion, links |
 
 ## Lab rules
 
 - Logged-out, prod-like (`WP_DEBUG` display off)
-- Do not hard-fail on arbitrary Unit Test content HTML; prefer controlled chrome URLs for vnu hard gate
-- `accessibility-ready` tag remains `BLOCK_TAG` until focus-trap + manual SR
+- Do not hard-fail on arbitrary Unit Test content HTML; prefer controlled chrome URLs for vnu hard gate; WP uses `softMode`
+- `accessibility-ready` tag remains `BLOCK_TAG` until focus-trap + manual SR (Org, not Quality)
 
-## L0 scope (implemented)
+## Manifests
 
-Gates: **Q1–Q6** via Docker runners + in-process `seo-meta` + `static` adapter fixture.
-
-Deferred: broken-link crawl, `prefers-reduced-motion`, Q1 median-of-3 / CWV.
-
-Manifest: `testdata/manifests/quality.lab.yaml`  
-Policy pack: `lightspeed`
+| File | Adapter | Notes |
+|------|---------|-------|
+| `testdata/manifests/quality.lab.yaml` | `static` | fixture L0; `seoSocial=true`; tight byte budgets |
+| `testdata/manifests/quality-wp.lab.yaml` | `wordpress` | `:8080` latte; soft vnu; looser budgets |
 
 ```bash
-make quality-up
-make runners   # includes css-lint + quality-extras
+make quality-up   # nginx fixture :8091
+make org-up       # WP :8080 for quality-wp
+make runners
 go run ./apps/cli run -f testdata/manifests/quality.lab.yaml -o /tmp/quality.audit.json
+go run ./apps/cli run -f testdata/manifests/quality-wp.lab.yaml -o /tmp/quality-wp.audit.json
 ```
+
+Honestly out of Quality scope: field INP (CrUX), sheet focus-trap / `accessibility-ready`.

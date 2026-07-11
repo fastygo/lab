@@ -14,14 +14,32 @@ spec:
         - id: lighthouse-mobile
           runner: lighthouse
           config:
+            runs: "3"
             perfFail: "0.7"
             perfWarn: "0.9"
             a11yFail: "0.9"
             a11yWarn: "0.95"
+            lcpFail: "4"
+            lcpWarn: "2.5"
+            clsFail: "0.25"
+            clsWarn: "0.1"
+            tbtFail: "600"
+            tbtWarn: "300"
+            fcpFail: "3"
+            fcpWarn: "1.8"
+            # Static fixture budgets (tight)
+            totalByteFail: "500000"
+            totalByteWarn: "200000"
+            scriptByteFail: "80000"
+            scriptByteWarn: "40000"
+            styleByteFail: "60000"
+            styleByteWarn: "30000"
     - id: Q2-vnu
       checks:
         - id: vnu-html
           runner: vnu
+          config:
+            softMode: "false"
     - id: Q3-css
       checks:
         - id: css-lint
@@ -37,7 +55,7 @@ spec:
         - id: seo-meta
           runner: seo-meta
           config:
-            seoSocial: "false"
+            seoSocial: "true"
     - id: Q6-extras
       checks:
         - id: quality-extras
